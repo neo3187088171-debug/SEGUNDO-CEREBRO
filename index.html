@@ -211,7 +211,7 @@ body.printing #printArea{display:block}
 .achcat{border-top:1px solid var(--line);padding:4px 0}.achcat summary{display:flex;justify-content:space-between}.achbar{display:block;height:4px;background:var(--line);border-radius:4px;margin:4px 8px 0;overflow:hidden}.achbar i{display:block;height:4px;background:linear-gradient(90deg,#ff9f1c,#ff4d6d)}
 .b3.hide{opacity:.6;font-size:.72rem;margin-top:4px}</style></head><body><div id="fx"></div>
 <header><h1>🧠 Mi segundo cerebro</h1><div class="hb"><button id="srch" aria-label="Buscar">🔍</button><button id="cfg" data-act="go" data-tab="mas" aria-label="Más opciones">⚙️</button></div></header>
-<div id="printArea"></div><div id="toasts"></div><div id="ctip" role="status"></div><div id="view"></div><div id="modal"></div>
+<div id="printArea"></div><div id="toasts"></div><div id="ctip" role="status"></div><div id="view"></div><div id="modal"></div><input type="file" id="restoreInput" hidden>
 <nav id="nav"><button data-tab="hoy"><span>🏠</span>Hoy</button><button data-tab="habitos"><span>✅</span>Hábitos</button><button id="navmic" class="mid" aria-label="Capturar con voz"><span>🎙️</span></button><button data-tab="org"><span>🗂️</span>Organizar<b id="bd"></b></button><button data-tab="gym"><span>🏋️</span>Gym</button></nav>
 <script>
 'use strict';
@@ -1035,10 +1035,23 @@ function downloadBackup(){
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([backupJSON()],{type:'application/json'}));a.download=backupName();document.body.appendChild(a);a.click();a.remove();
   db.lastBackup=Date.now();commit();toast('Copia descargada. Súbela a Google Drive.');
 }
+function parseBackup(txt){
+  txt=String(txt||'').replace(/^﻿/,'').trim();let o;
+  try{o=JSON.parse(txt)}catch(e){const i=txt.indexOf('{'),j=txt.lastIndexOf('}');if(i<0||j<=i)throw new Error('el archivo no contiene una copia (no es JSON)');o=JSON.parse(txt.slice(i,j+1))}
+  if(typeof o==='string')o=JSON.parse(o);
+  let d=o&&o.data&&typeof o.data==='object'?o.data:o;
+  if(!d||typeof d!=='object'||!Array.isArray(d.items))throw new Error('el archivo no parece una copia de Mi segundo cerebro');
+  if(!Array.isArray(d.projects))d.projects=[];if(!d.logs||typeof d.logs!=='object')d.logs={};
+  return d;
+}
+let pendingRestore=null;
 function restoreFile(file){
   const r=new FileReader();
-  r.onload=()=>{try{const o=JSON.parse(r.result);const d=o.data||o;if(!Array.isArray(d.items)||!Array.isArray(d.projects))throw new Error('El archivo no parece una copia válida');
-    if(confirm('Esto reemplazará los datos actuales por los de la copia. ¿Continuar?')){const b=blank();db=Object.assign(b,d);db.settings=Object.assign(blank().settings,d.settings||{});migrate();commit();toast('Copia restaurada ✓')}}catch(e){alert('No se pudo restaurar: '+e.message)}};
+  r.onerror=()=>openModal('<b>❌ No pude leer el archivo</b><div class="small">Android no permitió abrir «'+esc(file.name)+'». Prueba copiarlo primero a la carpeta Descargas y elegirlo desde ahí.</div><button class="b2" data-act="closem">Cerrar</button>');
+  r.onload=()=>{try{const d=parseBackup(r.result);pendingRestore=d;
+      const days=Object.keys(d.logs||{}).length;
+      openModal('<b>📂 Restaurar copia</b><div class="small">Archivo: '+esc(file.name)+'</div><div class="kts">'+tile('Elementos',d.items.length,'tareas, notas, capturas')+tile('Proyectos',d.projects.length,'')+tile('Días',days,'con registros')+'</div><div class="note">Esto reemplaza los datos que tiene ahora la app por los de la copia.</div><div class="row"><button class="b ok" data-act="restoreGo">Sí, restaurar</button><button class="b2" data-act="closem">Cancelar</button></div>');
+    }catch(e){openModal('<b>❌ No se pudo restaurar</b><div class="small">Motivo: '+esc(e.message)+'.</div><div class="small">Archivo elegido: '+esc(file.name)+' ('+Math.round(file.size/1024)+' KB). Debe ser el .json que descargaste desde Más → «Descargar archivo» o «Guardar copia».</div><button class="b2" data-act="closem">Cerrar</button>')}};
   r.readAsText(file);
 }
 
@@ -1372,7 +1385,7 @@ function blockSummaryHTML(dt){
 function viewHoy(){
   const d=today(),now=fromStr(d),dt=dayType(),pr=progressNow();
   let h='';
-  if(!db.items.length&&!db.projects.length&&!Object.keys(db.logs).some(k=>Object.keys(db.logs[k]).length))h+='<section class="card next"><b>👋 ¿Vienes de la versión anterior?</b><div class="small">Restaura tu copia (.json) para recuperar tus tareas, proyectos y registros.</div><label class="b fl">📂 Restaurar mi copia<input type="file" accept="application/json,.json" data-chg="restore" hidden></label></section>';
+  if(!db.items.length&&!db.projects.length&&!Object.keys(db.logs).some(k=>Object.keys(db.logs[k]).length))h+='<section class="card next"><b>👋 ¿Vienes de la versión anterior?</b><div class="small">Restaura tu copia (.json) para recuperar tus tareas, proyectos y registros.</div><label class="b fl" for="restoreInput">📂 Restaurar mi copia</label></section>';
   h+=top3HTML();
   h+=timelineHTML(dt);
   h+=alertsHTML();
@@ -1647,7 +1660,7 @@ function viewMas(){
   h+='<section class="card"><b>💛 Personas importantes</b><div class="small">A quién quieres cuidar y cada cuánto. Te aviso en Hoy si se te pasa.</div>'
    +((db.people||[]).map(p=>'<div class="rr"><span><b>'+esc(p.name)+'</b> · '+esc(p.action||'tiempo juntos')+' cada '+p.every+' días<br><small>'+(personLast(p)?'Última vez: '+ymd(personLast(p)):'Sin registros aún')+'</small></span><button class="b3" data-act="pdel" data-id="'+p.id+'">🗑</button></div>').join('')||'')
    +'<input id="pnm" placeholder="Nombre (ej.: Mamá, Lina, mis hijos)"><input id="pac" placeholder="Qué (ej.: llamada, salida, tiempo de calidad)"><label>Cada cuántos días<input id="pev" type="number" min="1" value="7"></label><button class="b" data-act="padd">Agregar persona</button></section>';
-  h+='<section class="card"><b>💾 Copia de seguridad</b><div class="small">Última copia: '+(db.lastBackup?new Date(db.lastBackup).toLocaleString('es-CO'):'nunca')+(backupDue()?' · <b>toca hacerla</b>':'')+'</div><button class="b" data-act="share">Guardar copia en Google Drive</button><button class="b2" data-act="download">Descargar archivo</button><label class="b2 fl">Restaurar copia<input type="file" accept="application/json,.json" data-chg="restore" hidden></label></section>';
+  h+='<section class="card"><b>💾 Copia de seguridad</b><div class="small">Última copia: '+(db.lastBackup?new Date(db.lastBackup).toLocaleString('es-CO'):'nunca')+(backupDue()?' · <b>toca hacerla</b>':'')+'</div><button class="b" data-act="share">Guardar copia en Google Drive</button><button class="b2" data-act="download">Descargar archivo</button><label class="b2 fl" for="restoreInput">Restaurar copia</label></section>';
   h+='<section class="card"><b>📦 Límite de tareas por día</b><div class="small">Sin contar tus 3 tareas principales. Si un día lo pasa, la app te ofrece repartirlas.</div><input type="number" min="1" max="30" value="'+dayLimit()+'" data-chg="dlim"></section>';
   h+='<section class="card"><b>🌱 Ciclo de actividad de crecimiento</b><div class="small">Avanza un paso por cada lunes a viernes normal (no festivos, no vacaciones, no sábados). Si se desfasó, corrígelo aquí.</div><label>'+(isWD(today())?'Hoy toca':'El próximo día hábil toca')+'<select data-chg="ciclo">'+CICLO.map((c,i)=>'<option value="'+i+'"'+(i===cicloIdx(isWD(today())?today():nextWD(today()))?' selected':'')+'>'+c+'</option>').join('')+'</select></label></section>';
   h+='<section class="card"><b>Ajustes</b><label class="sw"><input type="checkbox" data-chg="set" data-f="cont"'+(db.settings.cont?' checked':'')+'> Dictado continuo (sigue escuchando hasta que toques ■)</label><label class="sw"><input type="checkbox" data-chg="set" data-f="sound"'+(db.settings.sound?' checked':'')+'> Sonido dentro de la app</label><label class="sw"><input type="checkbox" data-chg="set" data-f="groups"'+(db.settings.groups!==false?' checked':'')+'> Agrupar pasos cortos (arreglo personal, salida, gym, alistar el día)</label><label>Tema<select data-chg="theme">'+[['auto','Automático: oscuro de 7:00 p. m. hasta que te levantas'],['light','Siempre claro'],['dark','Siempre oscuro']].map(o=>'<option value="'+o[0]+'"'+((db.settings.theme||'auto')===o[0]?' selected':'')+'>'+o[1]+'</option>').join('')+'</select></label></section>';
@@ -2125,6 +2138,7 @@ const ACT={
  saveedit:d=>{const i=readEditor(d.id,document.querySelector('#modal .ed'));if(i&&i.status==='inbox'){confirmItem(i);toast('Organizada como '+i.type+' ✓')}closeModal();commit()},
  closem:()=>closeModal(),
  capClose:()=>closeModal(),
+ restoreGo:()=>{const d=pendingRestore;if(!d)return;pendingRestore=null;const b=blank();db=Object.assign(b,d);db.settings=Object.assign(blank().settings,d.settings||{});migrate();closeModal();commit();celebrate('ok','Copia restaurada ✓',db.items.length+' elementos, '+db.projects.length+' proyectos y '+Object.keys(db.logs).length+' días de registros recuperados.')},
  hhide:d=>{if(!confirm('¿Ocultar «'+d.n+'» de tu rutina? Lo recuperas en ⚙️ → Hábitos ocultos.'))return;db.hidden=db.hidden||[];if(!db.hidden.includes(d.n))db.hidden.push(d.n);commit();toast('Oculto: '+d.n)},
  hhidesel:()=>{const v=document.getElementById('hidesel').value;if(v)ACT.hhide({n:v})},
  hshow:d=>{db.hidden=(db.hidden||[]).filter(x=>x!==d.n);commit();toast('Recuperado: '+d.n)},
@@ -2245,7 +2259,7 @@ const CHG={
  dlim:el=>{db.settings.dayLimit=Math.max(1,+el.value||5);commit();toast('Límite: '+dayLimit()+' tareas por día')},
  pr:el=>{ui.pr[el.dataset.id]=ui.pr[el.dataset.id]||{};ui.pr[el.dataset.id][el.dataset.f]=el.value;el.closest('.item').classList.add('staged')},
  hset:el=>{const k=el.dataset.f==='min'?el.dataset.id:el.dataset.id+'|'+el.dataset.dt;db.hOver[k]=db.hOver[k]||{};db.hOver[k][el.dataset.f]=el.dataset.f==='min'?(+el.value||1):el.value;commit()},
- restore:el=>{if(el.files[0])restoreFile(el.files[0])},
+ restore:el=>{const f=el.files&&el.files[0];el.value='';if(f)restoreFile(f)},
  gdone:el=>{const g=el.closest('.gx'),q=x=>{const i=g.querySelector('[data-chg='+x+']');return i?i.value:undefined};const w=q('gw'),u=q('gu'),pt={done:el.checked};if(w!==undefined){pt.w=w;pt.u=u}if(q('gs')!==undefined){pt.s=q('gs');pt.r=q('gr')}
    const e=gymFindEx(el.dataset.ex),mx=e&&!e.bw&&gymMax(e,today());gymSetEx(el.dataset.ex,pt);commit();
    if(el.checked){if(mx&&w!==''&&u===mx.u&&+w>mx.w){db.prCount=(db.prCount||0)+1;persist()}if(mx&&w!==''&&u===mx.u&&+w>mx.w)celebrate('ok','🏆 ¡Nuevo récord!',e.name+': '+fmtW(w,u)+' (antes '+fmtW(mx.w,mx.u)+')');else toast('✓ '+(e&&e.bw?e.name:fmtW(w,u))+' guardado')}},
@@ -2293,6 +2307,7 @@ function init(){
     if(e.target.id==='sq'){document.getElementById('sr').innerHTML=searchHTML(e.target.value)}
     if(e.target.id==='t3q'){const q=norm(e.target.value);document.querySelectorAll('#top3pick label').forEach(l=>{l.style.display=norm(l.textContent).includes(q)?'':'none'})}
   });
+  document.getElementById('restoreInput').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(f)restoreFile(f);setTimeout(()=>{e.target.value=''},500)});
   document.getElementById('navmic').addEventListener('click',()=>{if(document.getElementById('capt')){startVoice();return}openCapture(true)});
   document.querySelectorAll('#nav button[data-tab]').forEach(b=>b.addEventListener('click',()=>{ui.tab=b.dataset.tab==='org'?(ui.lastOrg||'capturas'):b.dataset.tab;ui.prMode=false;paint();window.scrollTo(0,0)}));
   document.getElementById('srch').addEventListener('click',()=>ACT.search());
