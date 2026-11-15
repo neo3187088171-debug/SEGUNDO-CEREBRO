@@ -309,7 +309,26 @@ function blank(){return {v:2,created:Date.now(),items:[],projects:[],logs:{},hOv
 function load(){try{const o=JSON.parse(localStorage.getItem(KEY));if(o&&o.items){const b=blank();Object.assign(b,o);b.settings=Object.assign(blank().settings,o.settings||{});return b}}catch(e){}return blank()}
 let db=load();
 const ui={tab:'hoy',area:'',filter:'activas',pr:{},prMode:false};
-function persist(){try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){toast('⚠️ No se pudo guardar: almacenamiento lleno o bloqueado')}}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){toast('⚠️ No se pudo guardar: almacenamiento lleno o bloqueado')}syncSoon()}
+/* ---------- Sincronización con Google Drive ----------
+   El link y la clave se guardan solo en este celular (nunca en el código). */
+const SYNC_KEY='sc_sync';let syncT=0,syncFirst=0,syncBusy=false;
+function syncCfg(){try{return JSON.parse(localStorage.getItem(SYNC_KEY))||{}}catch(e){return {}}}
+function syncSave(c){try{localStorage.setItem(SYNC_KEY,JSON.stringify(c))}catch(e){}}
+function syncSoon(){const c=syncCfg();if(!c.url||!c.token)return;if(!syncFirst)syncFirst=Date.now();clearTimeout(syncT);
+  if(Date.now()-syncFirst>60000){syncNow(false);return}syncT=setTimeout(()=>syncNow(false),5000)}
+function syncNow(show){
+  const c=syncCfg();clearTimeout(syncT);syncT=0;syncFirst=0;
+  if(!c.url||!c.token){if(show)toast('Primero pega el link y la clave');return Promise.resolve(false)}
+  if(syncBusy){syncSoon();return Promise.resolve(false)}syncBusy=true;
+  return fetch(c.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({token:c.token,backup:backupJSON()})})
+    .then(r=>r.json()).then(j=>{const k=syncCfg();if(j.ok){k.ok=Date.now();k.err=''}else k.err=j.error||'error';syncSave(k);if(show)toast(j.ok?'Sincronizado con Drive ✓':'⚠️ '+k.err);return !!j.ok})
+    .catch(e=>{const k=syncCfg();k.err='sin conexión';syncSave(k);if(show)toast('No se pudo sincronizar. Revisa el link o la conexión.');return false})
+    .finally(()=>{syncBusy=false})}
+function syncCard(){const c=syncCfg(),on=!!(c.url&&c.token);
+  return '<section class="card"><b>☁️ Sincronizar con Google Drive</b><div class="small">'+(on?'Activa · última vez: '+(c.ok?new Date(c.ok).toLocaleString('es-CO'):'aún no')+(c.err?' · ⚠️ '+esc(c.err):''):'Pega el link y la clave del buzón en Drive. Se guardan solo en este celular.')+'</div>'
+   +'<input id="syurl" placeholder="Link del Apps Script (termina en /exec)" value="'+esc(c.url||'')+'"><input id="sytk" type="password" placeholder="Clave" value="'+esc(c.token||'')+'">'
+   +'<button class="b" data-act="sysave">Guardar y sincronizar</button>'+(on?' <button class="b2" data-act="synow">Sincronizar ahora</button>':'')+'</section>'}
 function commit(){FQ={};CYC={};HF={};STK={};AH=null;XP=null;persist();if(typeof paint==='function')paint();if(typeof scheduleAch==='function')scheduleAch()}
 
 /* ---------- Analizador de capturas ---------- */
@@ -1833,6 +1852,7 @@ function viewMas(){
    +((db.people||[]).map(p=>'<div class="rr"><span><b>'+esc(p.name)+'</b> · '+esc(p.action||'tiempo juntos')+' cada '+p.every+' días<br><small>'+(personLast(p)?'Última vez: '+ymd(personLast(p)):'Sin registros aún')+'</small></span><button class="b3" data-act="pdel" data-id="'+p.id+'">🗑</button></div>').join('')||'')
    +'<input id="pnm" placeholder="Nombre (ej.: Mamá, Lina, mis hijos)"><input id="pac" placeholder="Qué (ej.: llamada, salida, tiempo de calidad)"><label>Cada cuántos días<input id="pev" type="number" min="1" value="7"></label><button class="b" data-act="padd">Agregar persona</button></section>';
   h+='<section class="card"><b>💾 Copia de seguridad</b><div class="small">Última copia: '+(db.lastBackup?new Date(db.lastBackup).toLocaleString('es-CO'):'nunca')+(backupDue()?' · <b>toca hacerla</b>':'')+'</div><button class="b" data-act="share">Guardar copia en Google Drive</button><button class="b2" data-act="download">Descargar archivo</button><label class="b2 fl" for="restoreInput">Restaurar copia</label></section>';
+  h+=syncCard();
   h+='<section class="card"><b>📦 Límite de tareas por día</b><div class="small">Sin contar tus 3 tareas principales. Si un día lo pasa, la app te ofrece repartirlas.</div><input type="number" min="1" max="30" value="'+dayLimit()+'" data-chg="dlim"></section>';
   h+='<section class="card"><b>🌱 Ciclo de actividad de crecimiento</b><div class="small">Avanza un paso por cada lunes a viernes normal (no festivos, no vacaciones, no sábados). Si se desfasó, corrígelo aquí.</div><label>'+(isWD(today())?'Hoy toca':'El próximo día hábil toca')+'<select data-chg="ciclo">'+CICLO.map((c,i)=>'<option value="'+i+'"'+(i===cicloIdx(isWD(today())?today():nextWD(today()))?' selected':'')+'>'+c+'</option>').join('')+'</select></label></section>';
   h+='<section class="card"><b>Ajustes</b><label class="sw"><input type="checkbox" data-chg="set" data-f="cont"'+(db.settings.cont?' checked':'')+'> Dictado continuo (sigue escuchando hasta que toques ■)</label><label class="sw"><input type="checkbox" data-chg="set" data-f="compact"'+(db.settings.compact!==false?' checked':'')+'> 📐 Vista compacta (menos scroll: secciones plegables y tareas en una línea)</label>'+soundHTML()+'<label class="sw"><input type="checkbox" data-chg="set" data-f="groups"'+(db.settings.groups!==false?' checked':'')+'> Agrupar pasos cortos (arreglo personal, salida, gym, alistar el día)</label><label>Tema<select data-chg="theme">'+[['auto','Automático: oscuro de 7:00 p. m. hasta que te levantas'],['light','Siempre claro'],['dark','Siempre oscuro']].map(o=>'<option value="'+o[0]+'"'+((db.settings.theme||'auto')===o[0]?' selected':'')+'>'+o[1]+'</option>').join('')+'</select></label></section>';
@@ -2395,6 +2415,11 @@ const ACT={
  askperm:async()=>{if(typeof Notification==='undefined'){toast('Este navegador no permite avisos');return}const r=await Notification.requestPermission();toast(r==='granted'?'Avisos activados ✓':'Avisos no activados');paint()},
  testnotif:()=>notify('🔔 Prueba','Si ves esto en la barra de notificaciones, los avisos funcionan.','test','./#mas'),
  share:()=>shareBackup(),download:()=>downloadBackup(),
+ sysave:()=>{const u=(document.getElementById('syurl').value||'').trim(),t=(document.getElementById('sytk').value||'').trim();
+   if(!/^https:\/\/script\.google\.com\/.+\/exec$/.test(u)){toast('El link debe empezar por https://script.google.com/ y terminar en /exec');return}
+   if(t.length<16){toast('La clave parece incompleta');return}
+   const c=syncCfg();c.url=u;c.token=t;c.err='';syncSave(c);syncNow(true).then(()=>{if(ui.tab==='mas')paint()})},
+ synow:()=>syncNow(true).then(()=>{if(ui.tab==='mas')paint()}),
  install:async()=>{if(!installEvt)return;installEvt.prompt();try{await installEvt.userChoice}catch(e){}installEvt=null;paint()},
  outing:()=>{db.outing=today();commit()},
  gadd:d=>{const k=d.day?+d.day:gymDayFor(),el=document.getElementById(d.day?'gnd_'+k:'gn_'+d.comp),t=el&&el.value.trim();if(!t)return;
@@ -2500,7 +2525,7 @@ function init(){
     navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.type==='go'){const h=(e.data.url||'').split('#')[1];if(VIEWS[h]){ui.tab=h;paint()}}});
   }
   try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
-  document.addEventListener('visibilitychange',()=>{syncWake();if(!document.hidden){if(lastDay!==today()){lastDay=today();CYC={}}ensureDaily();runSchedule();paint()}});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden&&syncT)syncNow(false);syncWake();if(!document.hidden){if(lastDay!==today()){lastDay=today();CYC={}}ensureDaily();runSchedule();paint()}});
   setInterval(tick,1000);setTimeout(runSchedule,1500);
 }
 if(typeof document!=='undefined'&&document.getElementById&&document.getElementById('view')&&!globalThis.__TEST__)init();
