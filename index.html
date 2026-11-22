@@ -1030,6 +1030,7 @@ function toast(msg,opt){
   opt=opt||{};const box=document.getElementById('toasts');if(!box)return;
   const el=document.createElement('div');el.className='toast';el.textContent=msg;
   if(opt.undo){const b=document.createElement('button');b.textContent='Deshacer';b.onclick=()=>{opt.undo();el.remove()};el.appendChild(b)}
+  if(opt.act){const b=document.createElement('button');b.textContent=opt.act.label;b.onclick=()=>{opt.act.fn();el.remove()};el.appendChild(b)}
   while(box.children.length>=2)box.firstChild.remove();
   box.appendChild(el);setTimeout(()=>el.remove(),opt.ms||5000);
 }
@@ -1493,6 +1494,8 @@ function alertsHTML(){
   let h='';const dt=dayType(),d=today();
   if(typeof Notification!=='undefined'&&Notification.permission==='default')h+='<div class="alert"><b>Activa los avisos</b><div class="small">Para recordarte tu plan, tus tareas con hora y los pendientes.</div><button class="b" data-act="askperm">Activar avisos</button></div>';
   {const ov=overloadedDays();if(ov.length){const o=ov[0];h+='<div class="alert"><b>📦 '+dayName(o.d)+' tienes '+o.n+' tareas y tu límite es '+dayLimit()+'</b><div class="small">'+(ov.length>1?'También: '+ov.slice(1,4).map(x=>dayName(x.d).toLowerCase()+' ('+x.n+')').join(', ')+'. ':'')+'Te ayudo a repartirlas sin borrar nada.</div><button class="b" data-act="spread">Repartir</button></div>'}}
+  {const n=altaList().length;if(n>ALTA_MAX)h+='<div class="alert"><b>🔺 Tienes '+n+' tareas Alta (máximo '+ALTA_MAX+')</b><div class="small">Si todo es urgente, nada lo es. Elige cuáles bajan.</div><button class="b" data-act="ago">Elegir cuáles bajan</button></div>';
+   const e=emptyProjects().length;if(e)h+='<div class="alert"><b>🧭 '+e+' proyecto'+(e>1?'s':'')+' sin siguiente paso</b><div class="small">Cada proyecto activo necesita al menos una próxima acción concreta.</div><button class="b" data-act="pgo">Definir uno por uno</button></div>'}
   if(backupDue())h+='<div class="alert"><b>💾 Toca hacer la copia (cada 2 días)</b><div class="small">Guárdala en Google Drive para poder recuperar todo.</div><button class="b" data-act="share">Guardar copia en Drive</button></div>';
   if(dt==='sun'&&isRealSunday(d)&&!weeklyDone()){const n=nextWeeklySlot();h+='<div class="alert"><b>🗓️ Revisión semanal pendiente</b><div class="small">'+(n?'Si la pospones, el siguiente aviso es a las '+fmt12(n)+'.':'Es el último aviso de hoy.')+'</div><button class="b" data-act="go" data-tab="revision">Empezar</button></div>'}
   delegDue().slice(0,3).forEach(i=>{h+='<div class="alert"><b>👥 ¿'+esc(i.deleg.to)+' ya entregó «'+esc(i.text.replace(/\s+/g,' ').slice(0,70))+'»?</b><div class="row"><button class="b ok" data-act="drecv" data-id="'+i.id+'">✓ Recibido</button><button class="b2" data-act="dfollow" data-id="'+i.id+'">Aún no (+2 días)</button></div></div>'});
@@ -1714,7 +1717,7 @@ function projStats(p){
 function viewProyectos(){
   let h='<input id="pjn" placeholder="Nombre del proyecto"><div class="chips sel">'+AREAS.map(a=>'<label class="cs"><input type="checkbox" name="pa" value="'+esc(a)+'"><span>'+esc(a)+'</span></label>').join('')+'</div>'
    +'<input id="pjd" placeholder="Acción diaria para avanzar (opcional), p. ej. Escribir 1 página"><div class="grid2"><label>Fecha meta<input id="pjf" type="date"></label><label>Monto necesario (opcional)<input id="pjm" type="number" min="0" placeholder="$"></label></div><button class="b" data-act="addproj">Crear proyecto</button>';
-  h=goalsHTML(true)+learnHTML()+sec('newproj','➕ Nuevo proyecto','',h,{open:false});
+  h=ordenCardHTML()+goalsHTML(true)+learnHTML()+sec('newproj','➕ Nuevo proyecto','',h,{open:false});
   const ps=db.projects.filter(p=>!p.archived);
   h+=ps.map(p=>{const s=projStats(p);const tl=db.items.filter(i=>i.project===p.id&&i.status==='active'&&!i.projectDaily).sort((a,b)=>rank(b)-rank(a));
    const body='<div class="chips">'+(p.areas||[]).map(a=>chip(a)).join('')+(p.dueDate?chip('Meta '+ymd(p.dueDate)):'')+(p.money?chip('Necesita $'+Number(p.money).toLocaleString('es-CO')):'')+'</div>'
@@ -1722,7 +1725,7 @@ function viewProyectos(){
    +'<div class="small">Tareas pendientes: '+s.pend+(s.late?' · <b style="color:var(--bad)">'+s.late+' atrasadas</b>':'')+' · Tiempo dedicado: '+fmtMin(s.sec)+'</div>'+more(tl.map(i=>itemCard(i)),8,'pjm-'+p.id)
    +'<div class="row"><input id="pt_'+p.id+'" placeholder="Agregar tarea a este proyecto" style="flex:1"><button class="b2" data-act="projtask" data-id="'+p.id+'">+</button></div>'
    +(p.dailyAction?'':'<div class="row"><input id="pa_'+p.id+'" placeholder="Definir acción diaria" style="flex:1"><button class="b2" data-act="projdaily" data-id="'+p.id+'">Guardar</button></div>')+'<button class="b3" data-act="archproj" data-id="'+p.id+'">🗄️ Archivar proyecto</button>';
-   const pc=projPct(p);return sec('pj-'+p.id,'📁 '+esc(p.name)+'<span class="pjm">'+(pc!=null?pc+' % hecho · ':'')+s.pend+' pendientes'+(s.late?' · <b style="color:var(--bad)">'+s.late+' atrasadas</b>':'')+'</span>','',body,{open:false})}).join('')||'<div class="small pad">Aún no tienes proyectos.</div>';
+   const pc=projPct(p);return sec('pj-'+p.id,'📁 '+esc(p.name)+'<span class="pjm">'+(emptyProjects().includes(p)?'⚠️ sin siguiente paso · ':'')+(pc!=null?pc+' % hecho · ':'')+s.pend+' pendientes'+(s.late?' · <b style="color:var(--bad)">'+s.late+' atrasadas</b>':'')+'</span>','',body,{open:false})}).join('')||'<div class="small pad">Aún no tienes proyectos.</div>';
   return h;
 }
 
@@ -2301,7 +2304,66 @@ function viewVencidas(){
    +'<div class="grid2" style="margin-top:12px"><button class="b ok" data-act="vdone" data-id="'+i.id+'">✓ Ya la hice</button><button class="b" data-act="vweek" data-id="'+i.id+'">📅 Esta semana</button><button class="b2" data-act="vlater" data-id="'+i.id+'">🗓️ Más adelante</button><button class="b3" data-act="vdrop" data-id="'+i.id+'">🗑 Descartar</button></div>'
    +(L.length>1?'<button class="b2" style="margin-top:8px;width:100%" data-act="vskip" data-id="'+i.id+'">Omitir por ahora</button>':'')+'</section>';
   return h}
-const VIEWS={vencidas:viewVencidas,semana:viewSemana,progreso:viewProgress,hoy:viewHoy,habitos:viewHabitos,capturas:viewCapturas,proyectos:viewProyectos,revision:viewRevision,gym:viewGym,mas:viewMas};
+
+/* ---------- Tanda A · Orden: siguiente paso, tope de Altas, tareas sin proyecto ---------- */
+const ALTA_MAX=5;
+const effPrio=i=>i.prioManual?i.priority:prioInfo(i).label;
+function altaList(){return tasks().filter(i=>effPrio(i)==='Alta').sort((a,b)=>rank(b)-rank(a))}
+function altaCheck(){const n=altaList().length;if(n>ALTA_MAX)toast('Tienes '+n+' tareas Alta (máximo '+ALTA_MAX+'). Baja alguna.',{ms:7000,act:{label:'Elegir',fn:()=>ACT.ago()}})}
+function emptyProjects(){return db.projects.filter(p=>!p.archived&&!db.items.some(i=>i.project===p.id&&(i.status==='active'||i.status==='inbox')&&!i.projectDaily))}
+const SW=new Set('para pero como esta este esto estos sobre desde hasta entre cuando donde todo todos toda todas tengo hacer tener mejor algo cosa cosas solo sola porque mismo misma ellos ellas nuestra nuestro aqui alla crear hacer organizar buscar revisar terminar empezar comenzar llamar enviar pedir sacar poner dejar ayudar ayude ayuda tarea tareas cada dias semana mañana manana'.split(' '));
+function toks(t){return (norm(t||'').match(/[a-z0-9ñ]{4,}/g)||[]).filter(w=>!SW.has(w))}
+function projSuggest(it,n){const w=new Set(toks(it.text+' '+(it.note||'')));if(!w.size)return [];
+  return db.projects.filter(p=>!p.archived).map(p=>{const bag=new Set(toks(p.name+' '+(p.dailyAction||'')+' '+db.items.filter(i=>i.project===p.id).map(i=>i.text).join(' ')));
+    let sc=0;w.forEach(x=>{if(bag.has(x))sc+=toks(p.name).includes(x)?3:1});return {p,sc}}).filter(x=>x.sc>=2).sort((a,b)=>b.sc-a.sc).slice(0,n||3).map(x=>x.p)}
+function looseFor(p,n){const w=new Set(toks(p.name+' '+(p.dailyAction||'')));if(!w.size)return [];
+  return tasks().filter(i=>!i.project).map(i=>({i,sc:toks(i.text).filter(x=>w.has(x)).length})).filter(x=>x.sc>=2).sort((a,b)=>b.sc-a.sc).slice(0,n||3).map(x=>x.i)}
+function noProjList(){const sk=ui.askip||[];const L=tasks().filter(i=>!i.project&&!i.noProjOk&&!i.repeat);
+  return L.filter(i=>!sk.includes(i.id)).concat(L.filter(i=>sk.includes(i.id)))}
+function pasoList(){const sk=ui.pskip||[];const L=emptyProjects();return L.filter(p=>!sk.includes(p.id)).concat(L.filter(p=>sk.includes(p.id)))}
+const BIG='<div style="font-size:1.1rem;font-weight:700;line-height:1.3;margin:2px 0 6px">';
+function backBtn(){return '<button class="b3" data-act="oback">← Volver</button>'}
+function viewPasos(){
+  const L=pasoList(),p=L[0];
+  let h='<section class="card"><div class="row between"><b>🧭 Proyectos sin siguiente paso</b>'+backBtn()+'</div>';
+  if(!p)return h+'<div class="small pad">🎉 Todos tus proyectos activos tienen al menos una tarea pendiente.</div></section>';
+  h+='<div class="small">Quedan <b>'+L.length+'</b>. Un proyecto sin próxima acción concreta no avanza: define el primer paso físico y visible.</div></section>';
+  const lf=looseFor(p,3);
+  h+='<section class="card">'+BIG+'📁 '+esc(p.name)+'</div><div class="chips">'+(p.areas||[]).map(a=>chip(a)).join('')+(p.dueDate?chip('Meta '+ymd(p.dueDate)):'')+'</div>'
+   +'<label>Siguiente paso<input id="ps_txt" placeholder="Ej.: Llamar a … / Buscar 3 opciones de …"></label>'
+   +'<label>¿Cuándo?<input id="ps_date" type="date" value="'+slotDate(1,5)+'"></label>'
+   +'<button class="b ok" style="width:100%;margin-top:8px" data-act="psave" data-id="'+p.id+'">✓ Guardar siguiente paso</button>'
+   +(lf.length?'<div class="small pad">O usa una tarea suelta que ya tienes:</div>'+lf.map(i=>'<div class="row"><span style="flex:1" class="small">'+esc(i.text)+'</span><button class="b2" data-act="puse" data-id="'+p.id+'" data-t="'+i.id+'">Usar</button></div>').join(''):'')
+   +'<div class="grid2" style="margin-top:10px"><button class="b3" data-act="parch" data-id="'+p.id+'">🗄️ Archivar proyecto</button>'+(L.length>1?'<button class="b2" data-act="pskip" data-id="'+p.id+'">Omitir por ahora</button>':'<span></span>')+'</div></section>';
+  return h}
+function viewAltas(){
+  const L=altaList(),n=L.length;
+  let h='<section class="card"><div class="row between"><b>🔺 Tareas Alta</b>'+backBtn()+'</div>'
+   +'<div class="small">Tienes <b>'+n+'</b> · máximo <b>'+ALTA_MAX+'</b>. Cuando todo es prioridad, nada lo es: deja en Alta solo lo que de verdad no puede esperar.</div>'
+   +(n<=ALTA_MAX?'<div class="small pad">✅ Estás dentro del límite.</div>':'')+'</section>';
+  h+='<section class="card">'+(L.map(i=>'<div class="item"><div class="itx">'+esc(i.text)+'</div><div class="chips">'+itemChips(i)+'</div>'
+   +(!i.prioManual?'<div class="small">Alta automática: '+esc(prioInfo(i).reasons.join(', '))+'</div>':'')
+   +'<div class="row"><button class="b2" data-act="adown" data-id="'+i.id+'" data-v="Normal">Bajar a Normal</button><button class="b3" data-act="adown" data-id="'+i.id+'" data-v="Baja">Baja</button></div></div>').join('')||'<div class="small">No tienes tareas Alta.</div>')+'</section>';
+  return h}
+function viewAsignar(){
+  const L=noProjList(),i=L[0],ps=db.projects.filter(p=>!p.archived);
+  let h='<section class="card"><div class="row between"><b>🧩 Tareas sin proyecto</b>'+backBtn()+'</div>';
+  if(!i)return h+'<div class="small pad">🎉 Todas tus tareas tienen proyecto o área.</div></section>';
+  const sg=projSuggest(i,3);
+  h+='<div class="small">Quedan <b>'+L.length+'</b>. Asígnale un proyecto o, si es algo suelto, solo un área de tu vida.</div></section>'
+   +'<section class="card">'+BIG+esc(i.text)+'</div><div class="chips">'+itemChips(i)+'</div>'
+   +(sg.length?'<div class="small pad">💡 Sugeridos:</div><div class="grid2">'+sg.map(p=>'<button class="b" data-act="aset" data-id="'+i.id+'" data-p="'+p.id+'">📁 '+esc(p.name.slice(0,40))+'</button>').join('')+'</div>':'')
+   +'<label>Otro proyecto<select id="as_p"><option value="">— elegir —</option>'+ps.map(p=>'<option value="'+p.id+'">'+esc(p.name)+'</option>').join('')+'</select></label>'
+   +'<button class="b2" style="width:100%" data-act="aset" data-id="'+i.id+'" data-p="">Asignar al elegido</button>'
+   +'<div class="small pad">Es suelta, solo área:</div><div class="chips">'+AREAS.map(a=>'<button class="chip" data-act="aarea" data-id="'+i.id+'" data-a="'+esc(a)+'">'+esc(a)+'</button>').join('')+'</div>'
+   +(L.length>1?'<button class="b3" style="margin-top:10px;width:100%" data-act="askp" data-id="'+i.id+'">Omitir por ahora</button>':'')+'</section>';
+  return h}
+function ordenCardHTML(){const e=emptyProjects().length,a=noProjList().length,al=altaList().length;if(!e&&!a&&al<=ALTA_MAX)return '';
+  return '<section class="card next"><b>🧹 Poner orden</b><div class="grid2" style="margin-top:6px">'
+   +(e?'<button class="b" data-act="pgo">🧭 '+e+' proyecto'+(e>1?'s':'')+' sin siguiente paso</button>':'')
+   +(a?'<button class="b2" data-act="ago2">🧩 '+a+' tarea'+(a>1?'s':'')+' sin proyecto</button>':'')
+   +(al>ALTA_MAX?'<button class="b2" data-act="ago">🔺 '+al+' Altas (máx. '+ALTA_MAX+')</button>':'')+'</div></section>'}
+const VIEWS={pasos:viewPasos,altas:viewAltas,asignar:viewAsignar,vencidas:viewVencidas,semana:viewSemana,progreso:viewProgress,hoy:viewHoy,habitos:viewHabitos,capturas:viewCapturas,proyectos:viewProyectos,revision:viewRevision,gym:viewGym,mas:viewMas};
 function paint(){
   const v=document.getElementById('view');if(!v)return;
   const y=window.scrollY,open=Array.from(v.querySelectorAll('details[open]:not([data-k])')).map(x=>x.querySelector('summary').textContent);
@@ -2392,7 +2454,7 @@ const ACT={
  drop:d=>{syncEditors();const i=db.items.find(x=>x.id===d.id);closeModal();if(i){i.status='dropped';fcount('dropped');top3Sync();commit();toast('Descartada',{undo:()=>{i.status='inbox';commit()}})}},
  itimer:d=>{const i=db.items.find(x=>x.id===d.id);if(i){if(i.tStart)stopItemTimer(i);else i.tStart=Date.now();commit()}},
  edit:d=>{const i=db.items.find(x=>x.id===d.id);if(i)openModal('<b>Editar</b>'+editor(i)+'<div class="acts"><button class="b ok" data-act="saveedit" data-id="'+i.id+'">Guardar</button><button class="b2" data-act="closem">Cancelar</button><button class="b3" data-act="drop" data-id="'+i.id+'">Descartar</button></div>')},
- saveedit:d=>{const i=readEditor(d.id,document.querySelector('#modal .ed'));if(i&&i.status==='inbox'){confirmItem(i);toast('Organizada como '+i.type+' ✓')}closeModal();commit()},
+ saveedit:d=>{const i=readEditor(d.id,document.querySelector('#modal .ed'));if(i&&i.status==='inbox'){confirmItem(i);toast('Organizada como '+i.type+' ✓')}closeModal();commit();altaCheck()},
  closem:()=>closeModal(),
  capClose:()=>closeModal(),
  restoreGo:()=>{const d=pendingRestore;if(!d)return;pendingRestore=null;const b=blank();db=Object.assign(b,d);db.settings=Object.assign(blank().settings,d.settings||{});migrate();closeModal();commit();celebrate('ok','Copia restaurada ✓',db.items.length+' elementos, '+db.projects.length+' proyectos y '+Object.keys(db.logs).length+' días de registros recuperados.')},
@@ -2440,7 +2502,7 @@ const ACT={
    db.top3log.push({date:today(),text:txt,res:'fail'});commit();celebrate('bad','No la hiciste','«'+txt+'» pasa automáticamente a mañana.')},
  prOpen:()=>{ui.tab='revision';ui.prMode=true;ui.pr={};paint();window.scrollTo(0,0)},
  prClose:()=>{ui.prMode=false;ui.pr={};paint()},
- prSave:()=>saveProjReview(),
+ prSave:()=>{saveProjReview();altaCheck()},
  addvac:()=>{const f=document.getElementById('vfrom').value,t=document.getElementById('vto').value||f;if(!f){toast('Elige la fecha de inicio');return}if(t<f){toast('La fecha final debe ser después de la inicial');return}
    let c=f,n=0;while(c<=t&&n<370){db.vacations[c]=true;c=addDays(c,1);n++}commit();toast('Vacaciones guardadas ✓ ('+n+' días)')},
  delvac:d=>{if(!confirm('¿Quitar estas vacaciones?'))return;let c=d.from;while(c<=d.to){delete db.vacations[c];c=addDays(c,1)}commit();toast('Vacaciones quitadas')},
@@ -2475,6 +2537,21 @@ const ACT={
  projdaily:d=>{const el=document.getElementById('pa_'+d.id),p=db.projects.find(x=>x.id===d.id);if(p&&el.value.trim()){p.dailyAction=el.value.trim();ensureDaily();commit()}},
  askperm:async()=>{if(typeof Notification==='undefined'){toast('Este navegador no permite avisos');return}const r=await Notification.requestPermission();toast(r==='granted'?'Avisos activados ✓':'Avisos no activados');paint()},
  testnotif:()=>notify('🔔 Prueba','Si ves esto en la barra de notificaciones, los avisos funcionan.','test','./#mas'),
+
+ oback:()=>{ui.tab=ui.oret||'hoy';paint();window.scrollTo(0,0)},
+ pgo:()=>{ui.oret=ui.tab==='pasos'?ui.oret:ui.tab;ui.pskip=[];ui.tab='pasos';paint();window.scrollTo(0,0)},
+ ago:()=>{if(ui.tab!=='altas')ui.oret=ui.tab;closeModal&&closeModal();ui.tab='altas';paint();window.scrollTo(0,0)},
+ ago2:()=>{ui.oret=ui.tab==='asignar'?ui.oret:ui.tab;ui.askip=[];ui.tab='asignar';paint();window.scrollTo(0,0)},
+ psave:d=>{const p=db.projects.find(x=>x.id===d.id),t=(document.getElementById('ps_txt').value||'').trim(),dt=document.getElementById('ps_date').value;if(!p)return;if(!t){toast('Escribe el siguiente paso');return}
+   db.items.unshift({id:uid(),text:t,src:'proyecto',created:Date.now(),status:'active',type:'Tarea',areas:p.areas&&p.areas.length?p.areas:['Personal'],priority:'Normal',prioManual:false,date:dt||'',time:'',project:p.id,sec:0,tStart:0,confirmedAt:Date.now()});commit();toast('Siguiente paso de «'+p.name.slice(0,30)+'» guardado ✓');window.scrollTo(0,0)},
+ puse:d=>{const p=db.projects.find(x=>x.id===d.id),i=db.items.find(x=>x.id===d.t);if(!p||!i)return;i.project=p.id;commit();toast('Tarea asignada a «'+p.name.slice(0,30)+'» ✓',{undo:()=>{i.project='';commit()}})},
+ parch:d=>{const p=db.projects.find(x=>x.id===d.id);if(p&&confirm('¿Archivar «'+p.name+'»?')){p.archived=true;db.items.filter(i=>i.projectDaily===p.id&&i.status==='active').forEach(i=>i.status='dropped');top3Sync();commit();toast('Proyecto archivado',{undo:()=>{p.archived=false;commit()}})}},
+ pskip:d=>{(ui.pskip=ui.pskip||[]).push(d.id);paint();window.scrollTo(0,0)},
+ adown:d=>{const i=db.items.find(x=>x.id===d.id);if(!i)return;const o={p:i.priority,m:i.prioManual};i.priority=d.v;i.prioManual=true;commit();toast('Bajó a '+d.v,{undo:()=>{i.priority=o.p;i.prioManual=o.m;commit()}})},
+ aset:d=>{const i=db.items.find(x=>x.id===d.id),pid=d.p||(document.getElementById('as_p')||{}).value;if(!i)return;if(!pid){toast('Elige un proyecto');return}const p=db.projects.find(x=>x.id===pid);
+   i.project=pid;if(p&&p.areas&&p.areas.length)i.areas=p.areas.slice();commit();toast('A «'+(p?p.name.slice(0,30):'')+'» ✓',{undo:()=>{i.project='';commit()}});window.scrollTo(0,0)},
+ aarea:d=>{const i=db.items.find(x=>x.id===d.id);if(!i)return;const o=i.areas;i.areas=[d.a];i.noProjOk=true;commit();toast('Suelta · '+d.a+' ✓',{undo:()=>{i.areas=o;delete i.noProjOk;commit()}});window.scrollTo(0,0)},
+ askp:d=>{(ui.askip=ui.askip||[]).push(d.id);paint();window.scrollTo(0,0)},
  vgo:()=>{ui.vskip=[];ui.tab='vencidas';paint();window.scrollTo(0,0)},
  vback:()=>{ui.tab='hoy';paint();window.scrollTo(0,0)},
  vdone:d=>ACT.done(d),
