@@ -1,1104 +1,291 @@
 {
- "id": "2026-11-22-organizar",
- "titulo": "Organización de bandeja y vencidas (22 nov)",
+ "id": "2026-11-22-notas",
+ "titulo": "Notas a tareas y proyectos (22 nov)",
+ "projects": [
+  {
+   "id": "pcmvo04u1vro8si",
+   "name": "Sistema de asistencias automático",
+   "areas": [
+    "Trabajo"
+   ],
+   "dailyAction": "",
+   "dailyMin": 0
+  },
+  {
+   "id": "pcmwfdapq7jsll7",
+   "name": "Sistemas de información geográfica (mapas)",
+   "areas": [
+    "Trabajo"
+   ],
+   "dailyAction": "",
+   "dailyMin": 0
+  },
+  {
+   "id": "pcmwjlfr0tx4ttf",
+   "name": "Aplicación que genere los videos",
+   "areas": [
+    "Personal"
+   ],
+   "dailyAction": "",
+   "dailyMin": 0
+  },
+  {
+   "id": "pcmwjlocywlp9ff",
+   "name": "Aplicación para clínicas de ventas",
+   "areas": [
+    "Trabajo"
+   ],
+   "dailyAction": "",
+   "dailyMin": 0
+  },
+  {
+   "id": "pcmwjn1x782sgfy",
+   "name": "Aplicación para gamificar mi estado físico",
+   "areas": [
+    "Personal"
+   ],
+   "dailyAction": "",
+   "dailyMin": 0
+  },
+  {
+   "id": "pcmwp0r34go1zpy",
+   "name": "Aplicativo de categorización de experiencia y premios",
+   "areas": [
+    "Trabajo"
+   ],
+   "dailyAction": "",
+   "dailyMin": 0
+  }
+ ],
  "ops": [
   {
-   "id": "mur666qhpn0hr",
-   "if": "missed",
+   "id": "mvmvfpwlj61xy",
+   "if": "active",
    "set": {
-    "status": "dropped",
-    "note": "Cerrada: proyecto archivado"
-   }
-  },
-  {
-   "id": "murxca3g07dnk",
-   "if": "missed",
-   "set": {
-    "status": "dropped",
-    "note": "Cerrada: proyecto archivado"
-   }
-  },
-  {
-   "id": "mutsauv0u58rr",
-   "if": "missed",
-   "set": {
-    "status": "dropped",
-    "note": "Cerrada: proyecto archivado"
-   }
-  },
-  {
-   "id": "muusahccejysy",
-   "if": "missed",
-   "set": {
-    "status": "dropped",
-    "note": "Cerrada: proyecto archivado"
-   }
-  },
-  {
-   "id": "muwkf9sorwahn",
-   "if": "missed",
-   "set": {
-    "status": "dropped",
-    "note": "Cerrada: proyecto archivado"
-   }
-  },
-  {
-   "id": "muxncw205x219",
-   "if": "missed",
-   "set": {
-    "status": "dropped",
-    "note": "Cerrada: proyecto archivado"
-   }
-  },
-  {
-   "id": "muzfs4ucz3zyw",
-   "if": "missed",
-   "set": {
-    "status": "dropped",
-    "note": "Cerrada: proyecto archivado"
-   }
-  },
-  {
-   "id": "mv0zce2o2tt7l",
-   "if": "missed",
-   "set": {
-    "status": "dropped",
-    "note": "Cerrada: proyecto archivado"
-   }
-  },
-  {
-   "id": "mv40chsewh0st",
-   "if": "missed",
-   "set": {
-    "status": "dropped",
-    "note": "Cerrada: proyecto archivado"
-   }
-  },
-  {
-   "id": "mv536wk17zcg4",
-   "if": "missed",
-   "set": {
-    "status": "dropped",
-    "note": "Cerrada: proyecto archivado"
-   }
-  },
-  {
-   "id": "mv6mylx1luhp6",
-   "if": "missed",
-   "set": {
-    "status": "dropped",
-    "note": "Cerrada: proyecto archivado"
-   }
-  },
-  {
-   "id": "mv7zyiue28la2",
-   "if": "missed",
-   "set": {
-    "status": "dropped",
-    "note": "Cerrada: proyecto archivado"
-   }
-  },
-  {
-   "id": "mv92lezw91du4",
-   "if": "missed",
-   "set": {
-    "status": "dropped",
-    "note": "Cerrada: proyecto archivado"
-   }
-  },
-  {
-   "id": "mvaz5z91lclde",
-   "if": "missed",
-   "set": {
-    "status": "dropped",
-    "note": "Cerrada: proyecto archivado"
-   }
-  },
-  {
-   "id": "mvcc2sk4859u7",
-   "if": "missed",
-   "set": {
-    "status": "dropped",
-    "note": "Cerrada: proyecto archivado"
-   }
-  },
-  {
-   "id": "mvdu7qfp365qh",
-   "if": "missed",
-   "set": {
-    "status": "dropped",
-    "note": "Cerrada: proyecto archivado"
-   }
-  },
-  {
-   "id": "mvf45pgy11nn7",
-   "if": "missed",
-   "set": {
-    "status": "dropped",
-    "note": "Cerrada: proyecto archivado"
-   }
-  },
-  {
-   "id": "mvjfr0mi6bnvx",
-   "if": "missed",
-   "set": {
-    "status": "dropped",
-    "note": "Cerrada: proyecto archivado"
-   }
-  },
-  {
-   "id": "mvmhemx7nlvku",
-   "if": "missed",
-   "set": {
-    "status": "dropped",
-    "note": "Cerrada: proyecto archivado"
-   }
-  },
-  {
-   "id": "mvnsvl0pupsqp",
-   "if": "missed",
-   "set": {
-    "status": "dropped",
-    "note": "Cerrada: proyecto archivado"
-   }
-  },
-  {
-   "id": "mvp5ejp7iu25r",
-   "if": "missed",
-   "set": {
-    "status": "dropped",
-    "note": "Cerrada: proyecto archivado"
-   }
-  },
-  {
-   "id": "mvrn0akffqyer",
-   "if": "missed",
-   "set": {
-    "status": "dropped",
-    "note": "Cerrada: proyecto archivado"
-   }
-  },
-  {
-   "id": "mvvifi5ud71e5",
-   "if": "inbox",
-   "set": {
-    "status": "active",
     "type": "Tarea",
-    "areas": [
-     "Personal"
-    ],
-    "project": "",
-    "date": "2026-11-23",
-    "time": "",
-    "priority": "Normal"
+    "date": "2026-11-24",
+    "time": ""
    }
   },
   {
-   "id": "mvwe90pc78eei",
-   "if": "inbox",
+   "id": "mvp7f29kegcdc",
+   "if": "active",
    "set": {
-    "status": "active",
-    "type": "Nota",
-    "areas": [
-     "Trabajo"
-    ],
-    "project": "mux9tugba359h",
-    "date": "",
-    "time": "",
-    "priority": "Normal"
-   }
-  },
-  {
-   "id": "mvy6e3r9v4jhq",
-   "if": "inbox",
-   "set": {
-    "status": "active",
     "type": "Tarea",
-    "areas": [
-     "Trabajo"
-    ],
-    "project": "murjt998k6k02",
-    "date": "2026-11-26",
-    "time": "",
-    "priority": "Normal"
-   }
-  },
-  {
-   "id": "mw6us5hc7vlmg",
-   "if": "inbox",
-   "set": {
-    "status": "active",
-    "type": "Tarea",
-    "areas": [
-     "Trabajo"
-    ],
-    "project": "",
-    "date": "2026-11-23",
-    "time": "",
-    "priority": "Normal"
-   }
-  },
-  {
-   "id": "mw9aburey8guk",
-   "if": "inbox",
-   "set": {
-    "status": "active",
-    "type": "Nota",
-    "areas": [
-     "Trabajo"
-    ],
-    "project": "mvg58hpwbk96d",
-    "date": "",
-    "time": "",
-    "priority": "Normal"
-   }
-  },
-  {
-   "id": "mwc7x2yu0xqgd",
-   "if": "inbox",
-   "set": {
-    "status": "active",
-    "type": "Tarea",
-    "areas": [
-     "Trabajo"
-    ],
-    "project": "",
-    "date": "2026-11-23",
-    "time": "",
-    "priority": "Normal"
-   }
-  },
-  {
-   "id": "mwe7wziklnbm4",
-   "if": "inbox",
-   "set": {
-    "status": "active",
-    "type": "Tarea",
-    "areas": [
-     "Trabajo"
-    ],
-    "project": "",
     "date": "2026-11-25",
-    "time": "",
-    "priority": "Alta"
+    "time": ""
    }
   },
   {
-   "id": "mwecejeia4feq",
-   "if": "inbox",
+   "id": "mv85fuavz7j4a",
+   "if": "active",
    "set": {
-    "status": "active",
     "type": "Tarea",
-    "areas": [
-     "Trabajo"
-    ],
-    "project": "",
     "date": "2026-11-27",
-    "time": "",
-    "priority": "Normal"
+    "time": ""
    }
   },
   {
-   "id": "mwejkjw5cc1wu",
-   "if": "inbox",
+   "id": "mvi59uico6n7b",
+   "if": "active",
    "set": {
-    "status": "active",
     "type": "Tarea",
-    "areas": [
-     "Trabajo"
-    ],
-    "project": "",
-    "date": "2026-12-01",
-    "time": "",
-    "priority": "Normal"
+    "date": "2026-12-07",
+    "time": ""
    }
   },
   {
-   "id": "mwejkx7b8183r",
-   "if": "inbox",
+   "id": "muysrmxybvswn",
+   "if": "active",
    "set": {
-    "status": "active",
     "type": "Tarea",
-    "areas": [
-     "Trabajo"
-    ],
-    "project": "mux9wqyorcah6",
-    "date": "2026-11-30",
-    "time": "",
-    "priority": "Normal"
-   }
-  },
-  {
-   "id": "mwejlhm3mypms",
-   "if": "inbox",
-   "set": {
-    "status": "active",
-    "type": "Tarea",
-    "areas": [
-     "Personal"
-    ],
-    "project": "",
-    "date": "2026-12-05",
-    "time": "",
-    "priority": "Normal"
-   }
-  },
-  {
-   "id": "mwejo3hbfe3x1",
-   "if": "inbox",
-   "set": {
-    "status": "active",
-    "type": "Nota",
-    "areas": [
-     "Trabajo"
-    ],
-    "project": "mvg58hpwbk96d",
-    "date": "",
-    "time": "",
-    "priority": "Normal"
-   }
-  },
-  {
-   "id": "mwejp1xllmkm2",
-   "if": "inbox",
-   "set": {
-    "status": "active",
-    "type": "Nota",
-    "areas": [
-     "Trabajo"
-    ],
-    "project": "mvg58hpwbk96d",
-    "date": "",
-    "time": "",
-    "priority": "Normal"
-   }
-  },
-  {
-   "id": "mwf0lvyd0wqoe",
-   "if": "inbox",
-   "set": {
-    "status": "active",
-    "type": "Tarea",
-    "areas": [
-     "Trabajo"
-    ],
-    "project": "mvg58hpwbk96d",
-    "date": "2026-12-02",
-    "time": "",
-    "priority": "Normal"
-   }
-  },
-  {
-   "id": "mwf0lymw9qz1a",
-   "if": "inbox",
-   "set": {
-    "status": "dropped",
-    "type": "Tarea",
-    "areas": [
-     "Trabajo"
-    ],
-    "project": "",
-    "date": "",
-    "time": "",
-    "priority": "Normal",
-    "note": "Duplicada de otra captura"
-   }
-  },
-  {
-   "id": "mwf0mz3i1uxrr",
-   "if": "inbox",
-   "set": {
-    "status": "active",
-    "type": "Nota",
-    "areas": [
-     "Trabajo"
-    ],
-    "project": "mvg58hpwbk96d",
-    "date": "",
-    "time": "",
-    "priority": "Normal"
-   }
-  },
-  {
-   "id": "mwf80sv2r61v6",
-   "if": "inbox",
-   "set": {
-    "status": "active",
-    "type": "Tarea",
-    "areas": [
-     "Personal"
-    ],
-    "project": "mux9wqyorcah6",
-    "date": "2026-12-03",
-    "time": "",
-    "priority": "Normal"
-   }
-  },
-  {
-   "id": "mwf8dmvo0lo1s",
-   "if": "inbox",
-   "set": {
-    "status": "active",
-    "type": "Tarea",
-    "areas": [
-     "Trabajo"
-    ],
-    "project": "mux9wqyorcah6",
-    "date": "2026-12-02",
-    "time": "",
-    "priority": "Normal"
-   }
-  },
-  {
-   "id": "mwfdapq7jsll7",
-   "if": "inbox",
-   "set": {
-    "status": "active",
-    "type": "Nota",
-    "areas": [
-     "Trabajo"
-    ],
-    "project": "",
-    "date": "",
-    "time": "",
-    "priority": "Normal"
-   }
-  },
-  {
-   "id": "mwfgjg5rhizfz",
-   "if": "inbox",
-   "set": {
-    "status": "active",
-    "type": "Tarea",
-    "areas": [
-     "Trabajo"
-    ],
-    "project": "",
-    "date": "2026-12-01",
-    "time": "",
-    "priority": "Normal"
-   }
-  },
-  {
-   "id": "mwjlfr0tx4ttf",
-   "if": "inbox",
-   "set": {
-    "status": "active",
-    "type": "Nota",
-    "areas": [
-     "Personal"
-    ],
-    "project": "mux9wqyorcah6",
-    "date": "",
-    "time": "",
-    "priority": "Normal"
-   }
-  },
-  {
-   "id": "mwjlocywlp9ff",
-   "if": "inbox",
-   "set": {
-    "status": "active",
-    "type": "Nota",
-    "areas": [
-     "Trabajo"
-    ],
-    "project": "mvg58hpwbk96d",
-    "date": "",
-    "time": "",
-    "priority": "Normal"
+    "date": "2026-12-07",
+    "time": ""
    }
   },
   {
    "id": "mwjml0y6fkqir",
-   "if": "inbox",
+   "if": "active",
    "set": {
-    "status": "active",
-    "type": "Nota",
-    "areas": [
-     "Trabajo"
-    ],
-    "project": "",
-    "date": "",
-    "time": "",
-    "priority": "Normal"
-   }
-  },
-  {
-   "id": "mwjn1x782sgfy",
-   "if": "inbox",
-   "set": {
-    "status": "active",
-    "type": "Nota",
-    "areas": [
-     "Personal"
-    ],
-    "project": "",
-    "date": "",
-    "time": "",
-    "priority": "Normal"
-   }
-  },
-  {
-   "id": "mwp0qdorn3dyp",
-   "if": "inbox",
-   "set": {
-    "status": "active",
     "type": "Tarea",
-    "areas": [
-     "Personal"
-    ],
-    "project": "",
-    "date": "2026-12-02",
-    "time": "",
-    "priority": "Normal"
+    "date": "2026-12-07",
+    "time": ""
    }
   },
   {
-   "id": "mwp0qrqyie86i",
-   "if": "inbox",
+   "id": "mvwe90pc78eei",
+   "if": "active",
    "set": {
-    "status": "active",
     "type": "Tarea",
-    "areas": [
-     "Trabajo"
-    ],
-    "project": "mux9tugba359h",
-    "date": "2026-11-26",
-    "time": "",
-    "priority": "Alta"
-   }
-  },
-  {
-   "id": "mwp0r34go1zpy",
-   "if": "inbox",
-   "set": {
-    "status": "active",
-    "type": "Nota",
-    "areas": [
-     "Trabajo"
-    ],
-    "project": "mux9tfw5epiy8",
-    "date": "",
-    "time": "",
-    "priority": "Normal"
-   }
-  },
-  {
-   "id": "mwp1ufi25b2ml",
-   "if": "inbox",
-   "set": {
-    "status": "active",
-    "type": "Tarea",
-    "areas": [
-     "Trabajo"
-    ],
-    "project": "murjt998k6k02",
-    "date": "2026-12-03",
-    "time": "",
-    "priority": "Normal"
-   }
-  },
-  {
-   "id": "mvsppumykbt4y",
-   "if": "active",
-   "set": {
-    "status": "done"
-   }
-  },
-  {
-   "id": "mvjprr549etuq",
-   "if": "active",
-   "set": {
-    "status": "done"
-   }
-  },
-  {
-   "id": "musjt504osqoj",
-   "if": "active",
-   "set": {
-    "status": "done"
-   }
-  },
-  {
-   "id": "muxla5aa131s6",
-   "if": "active",
-   "set": {
-    "status": "done"
-   }
-  },
-  {
-   "id": "muva8kumnd9ag",
-   "if": "active",
-   "set": {
-    "status": "done"
-   }
-  },
-  {
-   "id": "muy9aieaegmei",
-   "if": "active",
-   "set": {
-    "status": "done"
-   }
-  },
-  {
-   "id": "muxkyo772mkpe",
-   "if": "active",
-   "set": {
-    "status": "done"
-   }
-  },
-  {
-   "id": "muy9w4gcs1nkz",
-   "if": "active",
-   "set": {
-    "status": "done"
-   }
-  },
-  {
-   "id": "mv9le29ax5ssh",
-   "if": "active",
-   "set": {
-    "status": "dropped"
-   }
-  },
-  {
-   "id": "mvtfih998ji4y",
-   "if": "active",
-   "set": {
-    "status": "dropped"
-   }
-  },
-  {
-   "id": "mvsqe1j9l2v9e",
-   "if": "active",
-   "set": {
-    "status": "dropped"
-   }
-  },
-  {
-   "id": "muqwwxhxshsmg",
-   "if": "active",
-   "set": {
-    "status": "dropped"
-   }
-  },
-  {
-   "id": "mur2238wvyzzs",
-   "if": "active",
-   "set": {
-    "status": "dropped"
-   }
-  },
-  {
-   "id": "muvgrlhmeumec",
-   "if": "active",
-   "set": {
-    "status": "dropped"
-   }
-  },
-  {
-   "id": "muv61q85yaj9w",
-   "if": "active",
-   "set": {
-    "status": "dropped"
-   }
-  },
-  {
-   "id": "muyiq2x33ppxf",
-   "if": "active",
-   "set": {
-    "status": "dropped"
-   }
-  },
-  {
-   "id": "muzllk125stwi",
-   "if": "active",
-   "set": {
-    "status": "dropped"
-   }
-  },
-  {
-   "id": "muvskf93rbtuh",
-   "if": "active",
-   "set": {
-    "status": "dropped"
-   }
-  },
-  {
-   "id": "muyiia9ipdwnq",
-   "if": "active",
-   "set": {
-    "status": "dropped"
-   }
-  },
-  {
-   "id": "muzp8bdtzjy2l",
-   "if": "active",
-   "set": {
-    "status": "dropped"
-   }
-  },
-  {
-   "id": "mveh40xayibcj",
-   "if": "active",
-   "set": {
-    "date": "2026-11-30",
-    "time": "",
-    "priority": "Alta"
-   }
-  },
-  {
-   "id": "mvsprk2m1cum3",
-   "if": "active",
-   "set": {
-    "date": "2026-12-01",
-    "time": "",
-    "priority": "Alta"
-   }
-  },
-  {
-   "id": "mvjpjd0b7msyu",
-   "if": "active",
-   "set": {
-    "date": "2026-12-01",
-    "time": "",
-    "priority": "Alta"
-   }
-  },
-  {
-   "id": "mur1qb07s44u9",
-   "if": "active",
-   "set": {
-    "date": "2026-11-24",
-    "time": "",
-    "priority": "Alta"
-   }
-  },
-  {
-   "id": "muqwq913a0ke7",
-   "if": "active",
-   "set": {
-    "date": "2026-12-03",
-    "time": "",
-    "priority": "Alta"
-   }
-  },
-  {
-   "id": "musq3b6qehaup",
-   "if": "active",
-   "set": {
-    "date": "2026-12-04",
-    "time": "",
-    "priority": "Alta"
-   }
-  },
-  {
-   "id": "musnm9wc50ftk",
-   "if": "active",
-   "set": {
-    "date": "2026-11-27",
-    "time": "",
-    "priority": "Alta"
-   }
-  },
-  {
-   "id": "musnkts7j8avm",
-   "if": "active",
-   "set": {
-    "date": "2026-11-30",
-    "time": "",
-    "priority": "Alta"
-   }
-  },
-  {
-   "id": "muwqtdwyjywcb",
-   "if": "active",
-   "set": {
-    "date": "2026-12-04",
-    "time": "",
-    "priority": "Alta"
-   }
-  },
-  {
-   "id": "musnlg4fzxz4c",
-   "if": "active",
-   "set": {
-    "date": "2026-11-30",
-    "time": "",
-    "priority": "Alta"
-   }
-  },
-  {
-   "id": "mvtmvni2ej0hh",
-   "if": "active",
-   "set": {
-    "date": "2026-12-03",
-    "time": "",
-    "priority": "Alta"
-   }
-  },
-  {
-   "id": "muvk7bxu9fje7",
-   "if": "active",
-   "set": {
-    "date": "2026-12-04",
-    "time": "",
-    "priority": "Alta"
-   }
-  },
-  {
-   "id": "muqxkf59agscu",
-   "if": "active",
-   "set": {
-    "date": "2026-12-07",
-    "time": "",
-    "priority": "Alta"
-   }
-  },
-  {
-   "id": "mvtoc8jc0pw46",
-   "if": "active",
-   "set": {
-    "date": "2026-12-07",
-    "time": "",
-    "priority": "Alta"
-   }
-  },
-  {
-   "id": "mvspwmfnomnxo",
-   "if": "active",
-   "set": {
-    "date": "2026-12-04",
-    "time": "",
-    "priority": "Alta"
-   }
-  },
-  {
-   "id": "mvsqe1j9wy782",
-   "if": "active",
-   "set": {
-    "date": "2026-12-01",
-    "time": "",
-    "priority": "Alta"
-   }
-  },
-  {
-   "id": "mux9q7dtzx6rc",
-   "if": "active",
-   "set": {
-    "date": "2026-12-02",
-    "time": "",
-    "priority": "Alta"
-   }
-  },
-  {
-   "id": "muyzv22qqjsfc",
-   "if": "active",
-   "set": {
-    "date": "2026-11-30",
-    "time": "",
-    "priority": "Alta"
-   }
-  },
-  {
-   "id": "muyilcj51css2",
-   "if": "active",
-   "set": {
-    "date": "2026-12-04",
-    "time": "",
-    "priority": "Alta"
-   }
-  },
-  {
-   "id": "muyclds2g6ov9",
-   "if": "active",
-   "set": {
-    "date": "2026-12-01",
-    "time": "",
-    "priority": "Alta"
-   }
-  },
-  {
-   "id": "mv6sykwlxelpx",
-   "if": "active",
-   "set": {
-    "date": "2026-12-07",
-    "time": "",
-    "priority": "Alta"
-   }
-  },
-  {
-   "id": "mv35rlivh2oyx",
-   "if": "active",
-   "set": {
-    "date": "2026-11-30",
-    "time": "",
-    "priority": "Alta"
-   }
-  },
-  {
-   "id": "mv173f6327wmm",
-   "if": "active",
-   "set": {
-    "date": "2026-12-03",
-    "time": "",
-    "priority": "Alta"
-   }
-  },
-  {
-   "id": "muzpblgckulc8",
-   "if": "active",
-   "set": {
-    "date": "2026-12-04",
-    "time": "",
-    "priority": "Alta"
-   }
-  },
-  {
-   "id": "mvftkw59fb5ze",
-   "if": "active",
-   "set": {
-    "date": "2026-12-03",
-    "time": "",
-    "priority": "Alta"
-   }
-  },
-  {
-   "id": "mvbfmtqy1vhaq",
-   "if": "active",
-   "set": {
-    "date": "2026-12-02",
-    "time": "",
-    "priority": "Alta"
-   }
-  },
-  {
-   "id": "mvbda7e9juit0",
-   "if": "active",
-   "set": {
-    "date": "2026-12-02",
-    "time": "",
-    "priority": "Alta"
-   }
-  },
-  {
-   "id": "mvo62l4qkuj87",
-   "if": "active",
-   "set": {
     "date": "2026-12-09",
     "time": ""
    }
   },
   {
-   "id": "muv61f0nvdkm6",
+   "id": "mwejo3hbfe3x1",
    "if": "active",
    "set": {
+    "type": "Tarea",
+    "date": "2026-12-09",
+    "time": ""
+   }
+  },
+  {
+   "id": "mwejp1xllmkm2",
+   "if": "active",
+   "set": {
+    "type": "Tarea",
+    "date": "2026-12-09",
+    "time": ""
+   }
+  },
+  {
+   "id": "mwf0mz3i1uxrr",
+   "if": "active",
+   "set": {
+    "type": "Tarea",
+    "date": "2026-12-09",
+    "time": ""
+   }
+  },
+  {
+   "id": "mvl6rofkuhaco",
+   "if": "active",
+   "set": {
+    "type": "Tarea",
+    "date": "2026-12-09",
+    "time": ""
+   }
+  },
+  {
+   "id": "mvl7g9t8g4orx",
+   "if": "active",
+   "set": {
+    "type": "Tarea",
     "date": "2026-12-10",
     "time": ""
    }
   },
   {
-   "id": "mvtods1ln4yqp",
+   "id": "muyiy20h91i9w",
    "if": "active",
    "set": {
-    "date": "2026-12-11",
-    "time": ""
+    "status": "dropped"
    }
   },
   {
-   "id": "muvgpv67oisrq",
+   "id": "mv6oj9ogsfs0u",
    "if": "active",
    "set": {
-    "date": "2026-12-14",
-    "time": ""
+    "status": "dropped"
    }
   },
   {
-   "id": "musq2y95eno4n",
+   "id": "mvfte5nbcgmwq",
    "if": "active",
    "set": {
-    "date": "2026-12-15",
-    "time": ""
+    "status": "dropped"
    }
   },
   {
-   "id": "muzllbm1z4z0d",
+   "id": "mvinum0w17bq0",
    "if": "active",
    "set": {
-    "date": "2026-12-16",
-    "time": ""
+    "status": "dropped"
    }
   },
   {
-   "id": "mux7uctezekup",
+   "id": "mviplgd5i84zy",
    "if": "active",
    "set": {
-    "date": "2026-12-17",
-    "time": ""
+    "status": "dropped"
    }
   },
   {
-   "id": "mvbd15qtcafjd",
+   "id": "mvjmow7j1b1bj",
    "if": "active",
    "set": {
-    "date": "2026-12-18",
-    "time": ""
+    "status": "dropped"
    }
   },
   {
-   "id": "mv9jm64bn2ida",
+   "id": "mvo6kz8qb5fcn",
    "if": "active",
    "set": {
-    "date": "2026-12-21",
-    "time": ""
+    "status": "dropped"
    }
   },
   {
-   "id": "mw00bgejvjeeg",
-   "if": "inbox",
+   "id": "mw9aburey8guk",
+   "if": "active",
    "set": {
-    "status": "dropped",
-    "type": "Nota",
-    "areas": [
-     "Personal"
-    ],
-    "project": "",
-    "date": "",
-    "time": "",
-    "priority": "Normal",
-    "note": "Incompleta"
+    "status": "dropped"
    }
   },
   {
-   "id": "mw9f53zyvihsc",
-   "if": "inbox",
+   "id": "mvo04u1vro8si",
+   "if": "active",
+   "conv": "proyecto",
    "set": {
-    "status": "dropped",
-    "type": "Nota",
-    "areas": [
-     "Trabajo"
-    ],
-    "project": "",
-    "date": "",
-    "time": "",
-    "priority": "Normal",
-    "note": "Sin detalle"
-   }
-  },
-  {
-   "id": "mwe7xf41rrmgq",
-   "if": "inbox",
-   "set": {
+    "type": "Proyecto",
     "status": "done",
-    "type": "Tarea",
-    "areas": [
-     "Trabajo"
-    ],
-    "project": "",
-    "date": "",
-    "time": "",
-    "priority": "Normal"
+    "note": "Convertido en proyecto",
+    "project": ""
+   }
+  },
+  {
+   "id": "mwfdapq7jsll7",
+   "if": "active",
+   "conv": "proyecto",
+   "set": {
+    "type": "Proyecto",
+    "status": "done",
+    "note": "Convertido en proyecto",
+    "project": ""
+   }
+  },
+  {
+   "id": "mwjlfr0tx4ttf",
+   "if": "active",
+   "conv": "proyecto",
+   "set": {
+    "type": "Proyecto",
+    "status": "done",
+    "note": "Convertido en proyecto",
+    "project": ""
+   }
+  },
+  {
+   "id": "mwjlocywlp9ff",
+   "if": "active",
+   "conv": "proyecto",
+   "set": {
+    "type": "Proyecto",
+    "status": "done",
+    "note": "Convertido en proyecto",
+    "project": ""
+   }
+  },
+  {
+   "id": "mwjn1x782sgfy",
+   "if": "active",
+   "conv": "proyecto",
+   "set": {
+    "type": "Proyecto",
+    "status": "done",
+    "note": "Convertido en proyecto",
+    "project": ""
+   }
+  },
+  {
+   "id": "mwp0r34go1zpy",
+   "if": "active",
+   "conv": "proyecto",
+   "set": {
+    "type": "Proyecto",
+    "status": "done",
+    "note": "Convertido en proyecto",
+    "project": ""
    }
   }
  ]

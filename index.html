@@ -328,18 +328,18 @@ function syncNow(show){
 /* ---------- Cambios de Claude ----------
    Trae ./cambios.json, muestra una vista previa y lo fusiona por id sin pisar lo que ya cambiaste. */
 const PATCH_KEY='sc_prepatch';
-function patchPlan(p){const r={ok:0,skip:0,done:0,dropped:0,date:0,org:0};
+function patchPlan(p){const r={ok:0,skip:0,done:0,dropped:0,date:0,org:0,proj:0};
   (p.ops||[]).forEach(o=>{const i=db.items.find(x=>x.id===o.id);
     if(!i||(o.if&&i.status!==o.if)){r.skip++;return}
     r.ok++;const s=o.set||{};
-    if(s.status==='done')r.done++;else if(s.status==='dropped')r.dropped++;else if(o.if==='inbox')r.org++;else r.date++});
+    if(o.conv==='proyecto')r.proj++;else if(s.status==='done')r.done++;else if(s.status==='dropped')r.dropped++;else if(o.if==='inbox')r.org++;else r.date++});
   return r}
 function patchCard(){
   const st=ui.patch;let h='<section class="card"><b>🤖 Cambios de Claude</b>';
   if(!st)h+='<div class="small">Trae los cambios que Claude preparó y te muestra qué va a pasar antes de aplicarlos.</div><button class="b" data-act="pview">Ver cambios pendientes</button>';
   else if(st.err)h+='<div class="small">⚠️ '+esc(st.err)+'</div><button class="b2" data-act="pview">Reintentar</button>';
   else{const r=st.r;
-    h+='<div class="small"><b>'+esc(st.p.titulo||st.p.id)+'</b></div><div class="small">'+r.org+' capturas organizadas · '+r.done+' hechas · '+r.dropped+' descartadas · '+r.date+' reprogramadas'+(r.skip?' · '+r.skip+' omitidas (ya las cambiaste tú)':'')+'</div><button class="b" data-act="papply"'+(r.ok?'':' disabled')+'>Aplicar '+r.ok+' cambios</button><button class="b3" data-act="pcancel">Cancelar</button>'}
+    h+='<div class="small"><b>'+esc(st.p.titulo||st.p.id)+'</b></div><div class="small">'+(r.org?r.org+' capturas organizadas · ':'')+(r.proj?r.proj+' notas pasan a proyecto · ':'')+r.done+' hechas · '+r.dropped+' descartadas · '+r.date+' con fecha nueva'+(r.skip?' · '+r.skip+' omitidas (ya las cambiaste tú)':'')+'</div><button class="b" data-act="papply"'+(r.ok?'':' disabled')+'>Aplicar '+r.ok+' cambios</button><button class="b3" data-act="pcancel">Cancelar</button>'}
   let last=null;try{last=localStorage.getItem(PATCH_KEY)}catch(e){}
   if(last)h+='<button class="b2" data-act="pundo">↺ Deshacer los últimos cambios de Claude</button>';
   return h+'</section>'}
@@ -351,9 +351,11 @@ function patchApply(){
   const p=ui.patch&&ui.patch.p;if(!p)return;
   try{localStorage.setItem(PATCH_KEY,JSON.stringify(db))}catch(e){toast('⚠️ No pude guardar la copia previa, no apliqué nada');return}
   let n=0;
+  (p.projects||[]).forEach(q=>{if(!db.projects.some(x=>x.id===q.id))db.projects.push(q)});
   (p.ops||[]).forEach(o=>{const i=db.items.find(x=>x.id===o.id);if(!i||(o.if&&i.status!==o.if))return;
     const s=o.set||{};Object.keys(s).forEach(k=>{i[k]=s[k]});
     if(s.status==='done'&&!i.doneAt)i.doneAt=Date.now();
+    if(o.conv==='proyecto')i.confirmedAt=Date.now();
     if(s.status==='active')i.confirmedAt=Date.now();
     n++});
   (db.patches=db.patches||[]).push(p.id);ui.patch=null;commit();toast(n+' cambios aplicados ✓',{ms:7000})}
