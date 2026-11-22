@@ -36,6 +36,7 @@ button{font:inherit;cursor:pointer}
 .badge{padding:5px 10px;border-radius:10px;background:#e7eefb;font-size:.85rem}.badge.ok{background:#dcf3e5;color:#0f5a30}.badge.warn{background:#fff0d6;color:#7a4300}.badge.bad{background:#fde1e3;color:var(--bad)}
 .tm{font-variant-numeric:tabular-nums;font-weight:700;color:var(--pri)}.tm.big{font-size:1.5rem}.tm.over{color:var(--bad)}
 .lock{background:#f4f1e6;border-radius:10px;padding:10px;color:#6b5a1f}
+.badtxt{color:var(--bad);font-weight:600}
 .alert{background:#fff6dc;border-radius:14px;padding:12px;margin:10px 0}.alert.bad{background:#fde1e3}.alert.ok{background:#dcf3e5}
 .note{background:#f4f6fa;border-radius:10px;padding:10px;margin-top:8px;font-size:.85rem;color:var(--mut)}
 .ring{width:74px;height:74px;border-radius:50%;border:6px solid var(--pri);display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800}.ring small{font-size:.6rem;font-weight:500;color:var(--mut)}
@@ -994,7 +995,7 @@ function top3HTML(){
 function top3Candidates(){
   const d=today(),g={'Atrasadas':[],'Activas de hoy':[],'Pospuestas (fecha futura)':[],'Activas sin fecha':[],'Capturas sin organizar':[],'Notas':[],'Proyectos':[]};
   db.items.forEach(i=>{
-    if(i.status==='dropped'||i.status==='done'||i.status==='missed')return;
+    if(i.status==='dropped'||i.status==='done'||i.status==='missed'||i.status==='someday')return;
     if(i.status==='inbox')g['Capturas sin organizar'].push(i);
     else if(i.type==='Nota')g['Notas'].push(i);
     else if(i.type==='Tarea'||i.type==='Evento'){if(!i.date)g['Activas sin fecha'].push(i);else if(i.date<d)g['Atrasadas'].push(i);else if(i.date===d)g['Activas de hoy'].push(i);else g['Pospuestas (fecha futura)'].push(i)}
@@ -1099,15 +1100,17 @@ function addCapture(text,src){
   return it;
 }
 function openCapture(voice){ui.vt='capt';
-  openModal('<div class="row between"><b>🎙️ Capturar</b><button class="b3" data-act="capClose">Cerrar</button></div><textarea id="capt" rows="4" placeholder="Habla o escribe una idea, tarea o nota…"></textarea><div id="micstat"></div><div class="row capbar"><button id="capmic" class="capmic" data-act="capMic" aria-label="Dictar">🎙️</button><button class="b ok" data-act="capSave">Guardar</button><button class="b2" data-act="capMore">Guardar y otra</button></div><div class="small">Puedes corregir el texto antes de guardar. También sirve el micrófono del teclado.</div>');
+  openModal('<div class="row between"><b>🎙️ Capturar</b><button class="b3" data-act="capClose">Cerrar</button></div><textarea id="capt" rows="4" placeholder="Habla o escribe una idea, tarea o nota…"></textarea><div id="micstat"></div><div id="capplan"></div><div class="row capbar"><button id="capmic" class="capmic" data-act="capMic" aria-label="Dictar">🎙️</button><button class="b ok" data-act="capSave">Guardar</button><button class="b2" data-act="capMore">Guardar y otra</button></div><div class="small">Puedes corregir el texto antes de guardar. También sirve el micrófono del teclado.</div>');
   document.getElementById('modal').classList.add('sheetwrap');ui.capSrc='';
   if(voice)startVoice();else setTimeout(()=>{const t=document.getElementById('capt');t&&t.focus()},60);
 }
 function saveCapture(more){
   stopVoice();const ta=document.getElementById('capt'),t=ta?ta.value.trim():'';
   if(!t){setMic(false,'No hay nada para guardar todavía.');return}
-  addCapture(t,ui.capSrc||'texto');ui.capSrc='';
-  if(more){const n=document.getElementById('capt');if(n){n.value='';n.focus()}setMic(false,'Guardada ✓ Escribe o dicta la siguiente.')}else closeModal();
+  const it=addCapture(t,ui.capSrc||'texto');ui.capSrc='';
+  const ask=it&&(it.type==='Tarea'||it.type==='Evento'||it.type==='Nota')&&!it.date;
+  if(more){const n=document.getElementById('capt');if(n){n.value='';n.focus()}setMic(false,'Guardada ✓ Escribe o dicta la siguiente.');const pb=document.getElementById('capplan');if(pb)pb.innerHTML=ask?capPlanHTML(it):''}
+  else if(ask){openModal(capPlanHTML(it,true));document.getElementById('modal').classList.add('sheetwrap')}else closeModal();
 }
 function setMic(on,msg){
   const b=document.getElementById('capmic');if(b){b.classList.toggle('on',on);b.textContent=on?'■':'🎙️'}
@@ -1340,13 +1343,15 @@ function itemChips(i){
   if(i.repeat)h+=chip('🔁 '+repTxt(i.repeat));
   if(i.deleg)h+=chip('👥 '+i.deleg.to+' · '+ymd(i.deleg.follow),'p');
   if(i.subs&&i.subs.length)h+=chip('☑ '+i.subs.filter(x=>x.done).length+'/'+i.subs.length);
-  return h;
+  if(i.est)h+=chip('⏱ '+fmtEst(i.est));
+  if(i.status==='someday')h+=chip('💤 Algún día');
+  return h+(i.cue?'<div class="small">📍 '+esc(i.cue)+'</div>':'');
 }
 function itemRow(i,o){
   const running=i.tStart>0,sc=itemTime(i),op=!!(ui.ix||{})[i.id],done=i.status==='done',d=today();
   const pr=i.prioManual?i.priority:prioInfo(i).label;
   const meta=[i.time?'🕒 '+fmt12(i.time):'',i.date&&i.date!==d?(i.date<d?'⚠ ':'📅 ')+ymd(i.date):'',pr==='Alta'?'★ Alta':'',(i.areas||[])[0]||'',i.project?'📁 '+projName(i.project):'',
-    i.subs&&i.subs.length?'☑ '+i.subs.filter(x=>x.done).length+'/'+i.subs.length:'',i.repeat?'🔁':'',i.deleg?'👥 '+i.deleg.to:'',i.type!=='Tarea'?i.type:''].filter(Boolean).join(' · ');
+    i.subs&&i.subs.length?'☑ '+i.subs.filter(x=>x.done).length+'/'+i.subs.length:'',i.repeat?'🔁':'',i.deleg?'👥 '+i.deleg.to:'',i.est?'⏱ '+fmtEst(i.est):'',i.cue?'📍 '+i.cue:'',i.type!=='Tarea'?i.type:''].filter(Boolean).join(' · ');
   const tm=sc>1||running?'<span class="tm" '+(running?'data-run="'+i.tStart+'" data-base="'+Math.round(i.sec||0)+'"':'')+'>'+fmt(sc)+'</span>':'';
   return '<div class="item cmp'+(done?' done':'')+(op?' open':'')+(pr==='Alta'&&!done?' hi':'')+'"><div class="irow">'
    +(o.noact?'':'<button class="ck'+(done?' on':'')+'" data-act="'+(done?'reopen':'done')+'" data-id="'+i.id+'" aria-label="'+(done?'Reabrir':'Marcar hecha')+'">'+(done?'✓':'')+'</button>')
@@ -1354,7 +1359,7 @@ function itemRow(i,o){
    +'<button class="mo" data-act="iexp" data-id="'+i.id+'" aria-label="Más opciones">'+(op?'▴':'⋯')+'</button></div>'
    +(op?'<div class="ix"><div class="chips">'+itemChips(i)+'</div>'+subsHTML(i)+(o.noact?'':'<div class="acts">'
      +(done?'':(i.type==='Tarea'?'<button class="b2" data-act="itimer" data-id="'+i.id+'">'+(running?'■ Parar':'▶ Cronómetro')+'</button>':'')
-       +(i.date!==addDays(d,1)?'<button class="b2" data-act="tomorrow" data-id="'+i.id+'">→ Mañana</button>':''))
+       +(i.date!==addDays(d,1)?'<button class="b2" data-act="tomorrow" data-id="'+i.id+'">→ Mañana</button>':'')+(i.type==='Tarea'?'<button class="b3" data-act="someday" data-id="'+i.id+'">💤 Algún día</button>':''))
      +'<button class="b2" data-act="edit" data-id="'+i.id+'">✏️ Editar</button></div>')+'</div>':'')+'</div>';
 }
 function itemCard(i,o){
@@ -1377,6 +1382,9 @@ function editor(i){
   +'<div class="chips sel">'+AREAS.map(a=>'<label class="cs"><input type="checkbox" name="area" value="'+esc(a)+'"'+((i.areas||[]).includes(a)?' checked':'')+'><span>'+esc(a)+'</span></label>').join('')+'</div>'
   +'<div class="grid2"><label>Fecha<input type="date" name="date" value="'+esc(i.date)+'"></label><label>Hora<input type="time" name="time" value="'+esc(i.time)+'"></label></div>'
   +'<label>Proyecto<select name="project"><option value="">Sin proyecto</option>'+db.projects.filter(p=>!p.archived).map(p=>'<option value="'+p.id+'"'+(p.id===i.project?' selected':'')+'>'+esc(p.name)+'</option>').join('')+'</select></label>'
+  +'<div class="grid2"><label>Tiempo estimado<select name="est">'+EST_OPTS.map(m=>'<option value="'+m+'"'+((+i.est||0)===m?' selected':'')+'>'+(m?fmtEst(m):'Sin estimar')+'</option>').join('')+'</select></label>'
+  +'<label>Estado<select name="st"><option value="">'+(i.status==='inbox'?'Captura':'Activa')+'</option><option value="someday"'+(i.status==='someday'?' selected':'')+'>💤 Algún día</option></select></label></div>'
+  +'<label>📍 Cuándo y dónde lo haré<input name="cue" value="'+esc(i.cue||'')+'" placeholder="Cuando termine la llamada de las 10, envío la cotización"></label>'
   +'<details class="edx"'+(i.repeat||i.deleg||(i.subs&&i.subs.length)?' open':'')+'><summary class="small">🔁 Repetir · 👥 Delegar · ☑ Subtareas</summary>'
   +'<div class="grid2"><label>Repetir<select name="rep">'+[['','No se repite'],['daily','Cada día'],['weekly','Cada semana'],['monthly','Cada mes'],['every','Cada N días']].map(o=>'<option value="'+o[0]+'"'+(((i.repeat||{}).type||'')===o[0]?' selected':'')+'>'+o[1]+'</option>').join('')+'</select></label><label>N días<input type="number" name="repn" min="2" value="'+((i.repeat||{}).n||7)+'"></label></div>'
   +'<div class="small">Días (para «Cada semana»)</div><div class="chips sel">'+[1,2,3,4,5,6,0].map(d=>'<label class="cs"><input type="checkbox" name="repd" value="'+d+'"'+(((i.repeat||{}).days||[]).includes(d)?' checked':'')+'><span>'+WD1[d]+'</span></label>').join('')+'</div>'
@@ -1392,6 +1400,9 @@ function readEditor(id,root){
   it.areas=areas.length?areas:['Personal'];
   it.date=q('date').value;it.time=q('time').value;it.project=q('project').value;
   const pr=q('priority').value;if(pr!==prioInfo(it).label||it.prioManual)it.prioManual=true;it.priority=pr;
+  if(q('est')){const e=+q('est').value||0;if(e)it.est=e;else delete it.est}
+  if(q('cue')){const c=q('cue').value.trim();if(c)it.cue=c;else delete it.cue}
+  if(q('st')){const st=q('st').value;if(st==='someday'){if(it.status!=='someday'){it.prevSt=it.status;it.status='someday';it.somedayAt=Date.now()}}else if(it.status==='someday'){it.status=it.prevSt==='inbox'?'inbox':'active';delete it.prevSt}}
   if(q('rep')){const rt=q('rep').value;if(rt){it.repeat={type:rt,n:Math.max(2,+q('repn').value||7),days:Array.from(root.querySelectorAll('[name=repd]:checked')).map(x=>+x.value)};if(rt==='monthly')it.repeat.dom=fromStr(it.date||today()).getDate();if(!it.date)it.date=today();it.repNext=''}else delete it.repeat;
     const to=q('dto').value.trim();if(to)it.deleg={to,follow:q('dfol').value||addDays(today(),2)};else delete it.deleg;
     const subs=[];const ds=root.querySelectorAll('[name=subd]'),ts=root.querySelectorAll('[name=subt]');ts.forEach((x,k)=>{if(x.value.trim())subs.push({t:x.value.trim(),done:ds[k].checked})});
@@ -1494,6 +1505,7 @@ function alertsHTML(){
   let h='';const dt=dayType(),d=today();
   if(typeof Notification!=='undefined'&&Notification.permission==='default')h+='<div class="alert"><b>Activa los avisos</b><div class="small">Para recordarte tu plan, tus tareas con hora y los pendientes.</div><button class="b" data-act="askperm">Activar avisos</button></div>';
   {const ov=overloadedDays();if(ov.length){const o=ov[0];h+='<div class="alert"><b>📦 '+dayName(o.d)+' tienes '+o.n+' tareas y tu límite es '+dayLimit()+'</b><div class="small">'+(ov.length>1?'También: '+ov.slice(1,4).map(x=>dayName(x.d).toLowerCase()+' ('+x.n+')').join(', ')+'. ':'')+'Te ayudo a repartirlas sin borrar nada.</div><button class="b" data-act="spread">Repartir</button></div>'}}
+  {const ov=timeOverDays();if(ov.length){const o=ov[0];h+='<div class="alert"><b>⏱ '+dayName(o.d)+' tienes '+fmtEst(o.m)+' estimadas y tu capacidad es '+fmtEst(dayCap())+'</b><div class="small">El día es un recipiente de tamaño fijo: elige qué sale.</div><button class="b" data-act="go" data-tab="semana">Ver la semana</button></div>'}}
   {const n=altaList().length;if(n>ALTA_MAX)h+='<div class="alert"><b>🔺 Tienes '+n+' tareas Alta (máximo '+ALTA_MAX+')</b><div class="small">Si todo es urgente, nada lo es. Elige cuáles bajan.</div><button class="b" data-act="ago">Elegir cuáles bajan</button></div>';
    const e=emptyProjects().length;if(e)h+='<div class="alert"><b>🧭 '+e+' proyecto'+(e>1?'s':'')+' sin siguiente paso</b><div class="small">Cada proyecto activo necesita al menos una próxima acción concreta.</div><button class="b" data-act="pgo">Definir uno por uno</button></div>'}
   if(backupDue())h+='<div class="alert"><b>💾 Toca hacer la copia (cada 2 días)</b><div class="small">Guárdala en Google Drive para poder recuperar todo.</div><button class="b" data-act="share">Guardar copia en Drive</button></div>';
@@ -1633,6 +1645,7 @@ function viewHoy(){
     let x='<div class="chips sel scroll"><button class="fc'+(ui.area===''?' on':'')+'" data-act="area" data-v="">Todas</button>'+AREAS.map(a=>'<button class="fc'+(ui.area===a?' on':'')+'" data-act="area" data-v="'+esc(a)+'">'+esc(a)+'</button>').join('')+'</div>';
     const groups=AREAS.filter(a=>!ui.area||ui.area===a).map(a=>({a,l:rest.filter(i=>(i.areas&&i.areas.length?i.areas:['Personal'])[0]===a)})).filter(g=>g.l.length);
     x+=groups.map(g=>grpDet('ta-'+g.a,esc(g.a),g.l.length,g.l.map(i=>itemCard(i)).join(''),groups.length===1||!!ui.area)).join('')||'<div class="small pad">No hay tareas en esta área.</div>';
+    {const m=dayMin(d),cap=dayCap();if(m)x='<div class="small pad'+(m>cap?' badtxt':'')+'">⏱ Plan de hoy: <b>'+fmtEst(m)+'</b> de '+fmtEst(cap)+' disponibles'+(m>cap?' · te pasaste '+fmtEst(m-cap)+', mueve algo':'')+'</div>'+x}
     h+=sec('tasks','📋 Tareas de hoy',rest.length,x,{open:true});
   }
   if(inbox.length)h+=sec('inbox','🗂️ Capturas sin organizar',inbox.length,inbox.slice(0,3).map(i=>'<div class="mini">'+esc(i.text)+'</div>').join('')+'<button class="b3" data-act="go" data-tab="capturas">Organizar</button>',{open:false});
@@ -1717,7 +1730,7 @@ function projStats(p){
 function viewProyectos(){
   let h='<input id="pjn" placeholder="Nombre del proyecto"><div class="chips sel">'+AREAS.map(a=>'<label class="cs"><input type="checkbox" name="pa" value="'+esc(a)+'"><span>'+esc(a)+'</span></label>').join('')+'</div>'
    +'<input id="pjd" placeholder="Acción diaria para avanzar (opcional), p. ej. Escribir 1 página"><div class="grid2"><label>Fecha meta<input id="pjf" type="date"></label><label>Monto necesario (opcional)<input id="pjm" type="number" min="0" placeholder="$"></label></div><button class="b" data-act="addproj">Crear proyecto</button>';
-  h=ordenCardHTML()+goalsHTML(true)+learnHTML()+sec('newproj','➕ Nuevo proyecto','',h,{open:false});
+  h=ordenCardHTML()+somedayHTML()+goalsHTML(true)+learnHTML()+sec('newproj','➕ Nuevo proyecto','',h,{open:false});
   const ps=db.projects.filter(p=>!p.archived);
   h+=ps.map(p=>{const s=projStats(p);const tl=db.items.filter(i=>i.project===p.id&&i.status==='active'&&!i.projectDaily).sort((a,b)=>rank(b)-rank(a));
    const body='<div class="chips">'+(p.areas||[]).map(a=>chip(a)).join('')+(p.dueDate?chip('Meta '+ymd(p.dueDate)):'')+(p.money?chip('Necesita $'+Number(p.money).toLocaleString('es-CO')):'')+'</div>'
@@ -1899,6 +1912,7 @@ function viewMas(){
   h+=syncCard();
   h+=patchCard();
   h+='<section class="card"><b>📦 Límite de tareas por día</b><div class="small">Sin contar tus 3 tareas principales. Si un día lo pasa, la app te ofrece repartirlas.</div><input type="number" min="1" max="30" value="'+dayLimit()+'" data-chg="dlim"></section>';
+  h+='<section class="card"><b>⏱ Horas de trabajo enfocado por día</b><div class="small">Suma del tiempo estimado de tus tareas. Si un día lo supera, te aviso. Burkeman sugiere 3–4 h de foco intenso.</div><input type="number" min="0.5" max="16" step="0.5" value="'+(dayCap()/60)+'" data-chg="dcap"></section>';
   h+='<section class="card"><b>🌱 Ciclo de actividad de crecimiento</b><div class="small">Avanza un paso por cada lunes a viernes normal (no festivos, no vacaciones, no sábados). Si se desfasó, corrígelo aquí.</div><label>'+(isWD(today())?'Hoy toca':'El próximo día hábil toca')+'<select data-chg="ciclo">'+CICLO.map((c,i)=>'<option value="'+i+'"'+(i===cicloIdx(isWD(today())?today():nextWD(today()))?' selected':'')+'>'+c+'</option>').join('')+'</select></label></section>';
   h+='<section class="card"><b>Ajustes</b><label class="sw"><input type="checkbox" data-chg="set" data-f="cont"'+(db.settings.cont?' checked':'')+'> Dictado continuo (sigue escuchando hasta que toques ■)</label><label class="sw"><input type="checkbox" data-chg="set" data-f="compact"'+(db.settings.compact!==false?' checked':'')+'> 📐 Vista compacta (menos scroll: secciones plegables y tareas en una línea)</label>'+soundHTML()+'<label class="sw"><input type="checkbox" data-chg="set" data-f="groups"'+(db.settings.groups!==false?' checked':'')+'> Agrupar pasos cortos (arreglo personal, salida, gym, alistar el día)</label><label>Tema<select data-chg="theme">'+[['auto','Automático: oscuro de 7:00 p. m. hasta que te levantas'],['light','Siempre claro'],['dark','Siempre oscuro']].map(o=>'<option value="'+o[0]+'"'+((db.settings.theme||'auto')===o[0]?' selected':'')+'>'+o[1]+'</option>').join('')+'</select></label></section>';
   h+='<section class="card"><details><summary><b>⏱️ Horarios y tiempos de tus hábitos</b></summary><div class="small">Primera hora = ideal; segunda = límite. Hasta el límite cuenta como cumplido (100 %). Después baja 2 % por minuto (naranja) y desde 50 min tarde es 0 % (rojo).</div>';
@@ -2216,7 +2230,7 @@ function waterHTML(){const n=waterN(),g=waterGoal();return '<div class="water"><
 function waterSlots(){const g=waterGoal();return [['10:00',1],['13:00',2],['16:00',3],['19:00',g]].map(([at,need])=>({id:'w'+at,at,win:60,cond:()=>waterN()<need,build:()=>({title:'💧 Toma agua',body:'Llevas '+waterN()+' de '+g+' tarros. A esta hora deberías ir en '+need+'.',url:'./#hoy'})}))}
 
 /* ---------- 12A · Metas del año ---------- */
-function projPct(p){const t=db.items.filter(i=>i.project===p.id&&i.status!=='dropped'&&!i.projectDaily&&(i.type==='Tarea'||i.type==='Evento'));if(!t.length)return null;return Math.round(t.filter(i=>i.status==='done').length*100/t.length)}
+function projPct(p){const t=db.items.filter(i=>i.project===p.id&&i.status!=='dropped'&&i.status!=='someday'&&!i.projectDaily&&(i.type==='Tarea'||i.type==='Evento'));if(!t.length)return null;return Math.round(t.filter(i=>i.status==='done').length*100/t.length)}
 function habitNamePct(name,from){let ok=0,base=0;logDays().filter(d=>d>=from).forEach(d=>{const dt=dtOf(d);habitsFor(dt,d).filter(h=>h.name===name).forEach(h=>{const s=hState(h,d,dt);if(s==='na')return;base++;if(s==='ok')ok++})});return base?Math.round(ok*100/base):null}
 function goalInfo(g){const from=(g.year||today().slice(0,4))+'-01-01',parts=[];
   (g.projects||[]).forEach(pid=>{const p=db.projects.find(x=>x.id===pid);if(p){const v=projPct(p);parts.push({t:'📁 '+p.name,v})}});
@@ -2301,7 +2315,7 @@ function viewVencidas(){
   h+='<div class="small">Quedan <b>'+L.length+'</b>. Decide esta y pasa a la siguiente.</div></section>'
    +'<section class="card"><div style="font-size:1.1rem;font-weight:700;line-height:1.3;margin:2px 0 6px">'+esc(i.text)+'</div>'
    +'<div class="chips">'+itemChips(i)+'</div><div class="small">Atrasada '+n+(n===1?' día':' días')+'</div>'
-   +'<div class="grid2" style="margin-top:12px"><button class="b ok" data-act="vdone" data-id="'+i.id+'">✓ Ya la hice</button><button class="b" data-act="vweek" data-id="'+i.id+'">📅 Esta semana</button><button class="b2" data-act="vlater" data-id="'+i.id+'">🗓️ Más adelante</button><button class="b3" data-act="vdrop" data-id="'+i.id+'">🗑 Descartar</button></div>'
+   +'<div class="grid2" style="margin-top:12px"><button class="b ok" data-act="vdone" data-id="'+i.id+'">✓ Ya la hice</button><button class="b" data-act="vweek" data-id="'+i.id+'">📅 Esta semana</button><button class="b2" data-act="vlater" data-id="'+i.id+'">🗓️ Más adelante</button><button class="b3" data-act="vdrop" data-id="'+i.id+'">🗑 Descartar</button></div><button class="b3" style="margin-top:8px;width:100%" data-act="someday" data-id="'+i.id+'">💤 Algún día</button>'
    +(L.length>1?'<button class="b2" style="margin-top:8px;width:100%" data-act="vskip" data-id="'+i.id+'">Omitir por ahora</button>':'')+'</section>';
   return h}
 
@@ -2363,6 +2377,21 @@ function ordenCardHTML(){const e=emptyProjects().length,a=noProjList().length,al
    +(e?'<button class="b" data-act="pgo">🧭 '+e+' proyecto'+(e>1?'s':'')+' sin siguiente paso</button>':'')
    +(a?'<button class="b2" data-act="ago2">🧩 '+a+' tarea'+(a>1?'s':'')+' sin proyecto</button>':'')
    +(al>ALTA_MAX?'<button class="b2" data-act="ago">🔺 '+al+' Altas (máx. '+ALTA_MAX+')</button>':'')+'</div></section>'}
+
+/* ---------- Tanda B · Algún día, tiempo estimado, cuándo-haré, plan al capturar ---------- */
+const EST_OPTS=[0,10,15,30,45,60,90,120,180,240];
+function fmtEst(m){m=Math.round(+m||0);const h=Math.floor(m/60),r=m%60;return h?(h+' h'+(r?' '+r:'')):r+' min'}
+const dayCap=()=>Math.max(30,+db.settings.dayCap||240);
+function dayMin(d){const t3=new Set((db.top3v2||[]).map(x=>x.ref));return tasks().filter(i=>i.date===d||(d===today()&&i.date&&i.date<d&&t3.has(i.id))).reduce((a,i)=>a+(+i.est||0),0)}
+function timeOverDays(){const out=[];for(let k=0;k<14;k++){const d=addDays(today(),k),m=dayMin(d);if(m>dayCap())out.push({d,m})}return out}
+function somedayList(){return db.items.filter(i=>i.status==='someday').sort((a,b)=>(b.somedayAt||b.created||0)-(a.somedayAt||a.created||0))}
+function somedayHTML(){const L=somedayList();if(!L.length)return '';
+  return sec('someday','💤 Algún día / Quizás',L.length,'<div class="small">Ideas aparcadas sin culpa. Revísalas en la revisión semanal: activa las que llegaron a su momento y borra las que ya no te importan.</div>'
+   +L.map(i=>'<div class="item"><div class="itx">'+esc(i.text)+'</div><div class="chips">'+itemChips(i)+'</div><div class="row"><button class="b2" data-act="sdon" data-id="'+i.id+'">▶ Activar esta semana</button><button class="b3" data-act="sddrop" data-id="'+i.id+'">🗑</button></div></div>').join(''),{open:false})}
+function capPlanHTML(it,full){
+  return (full?'<div class="row between"><b>✓ Guardada</b><button class="b3" data-act="capClose">Después decido</button></div><div class="mini">'+esc(it.text)+'</div>':'<div class="small pad">Última: <b>'+esc(it.text.slice(0,50))+'</b></div>')
+   +'<div class="small pad">¿Cuándo lo haces? Un plan concreto libera la cabeza.</div><div class="grid2">'
+   +[['hoy','Hoy'],['man','Mañana'],['sem','Esta semana'],['sd','💤 Algún día']].map(x=>'<button class="b'+(x[0]==='sd'?'3':x[0]==='hoy'?'':'2')+'" data-act="cplan" data-id="'+it.id+'" data-v="'+x[0]+'"'+(full?' data-close="1"':'')+'>'+x[1]+'</button>').join('')+'</div>'}
 const VIEWS={pasos:viewPasos,altas:viewAltas,asignar:viewAsignar,vencidas:viewVencidas,semana:viewSemana,progreso:viewProgress,hoy:viewHoy,habitos:viewHabitos,capturas:viewCapturas,proyectos:viewProyectos,revision:viewRevision,gym:viewGym,mas:viewMas};
 function paint(){
   const v=document.getElementById('view');if(!v)return;
@@ -2454,7 +2483,7 @@ const ACT={
  drop:d=>{syncEditors();const i=db.items.find(x=>x.id===d.id);closeModal();if(i){i.status='dropped';fcount('dropped');top3Sync();commit();toast('Descartada',{undo:()=>{i.status='inbox';commit()}})}},
  itimer:d=>{const i=db.items.find(x=>x.id===d.id);if(i){if(i.tStart)stopItemTimer(i);else i.tStart=Date.now();commit()}},
  edit:d=>{const i=db.items.find(x=>x.id===d.id);if(i)openModal('<b>Editar</b>'+editor(i)+'<div class="acts"><button class="b ok" data-act="saveedit" data-id="'+i.id+'">Guardar</button><button class="b2" data-act="closem">Cancelar</button><button class="b3" data-act="drop" data-id="'+i.id+'">Descartar</button></div>')},
- saveedit:d=>{const i=readEditor(d.id,document.querySelector('#modal .ed'));if(i&&i.status==='inbox'){confirmItem(i);toast('Organizada como '+i.type+' ✓')}closeModal();commit();altaCheck()},
+ saveedit:d=>{const i=readEditor(d.id,document.querySelector('#modal .ed'));if(i&&i.status==='someday'){toast('💤 Guardada en Algún día')}else if(i&&i.status==='inbox'){confirmItem(i);toast('Organizada como '+i.type+' ✓')}closeModal();commit();altaCheck()},
  closem:()=>closeModal(),
  capClose:()=>closeModal(),
  restoreGo:()=>{const d=pendingRestore;if(!d)return;pendingRestore=null;const b=blank();db=Object.assign(b,d);db.settings=Object.assign(blank().settings,d.settings||{});migrate();closeModal();commit();celebrate('ok','Copia restaurada ✓',db.items.length+' elementos, '+db.projects.length+' proyectos y '+Object.keys(db.logs).length+' días de registros recuperados.')},
@@ -2538,6 +2567,14 @@ const ACT={
  askperm:async()=>{if(typeof Notification==='undefined'){toast('Este navegador no permite avisos');return}const r=await Notification.requestPermission();toast(r==='granted'?'Avisos activados ✓':'Avisos no activados');paint()},
  testnotif:()=>notify('🔔 Prueba','Si ves esto en la barra de notificaciones, los avisos funcionan.','test','./#mas'),
 
+
+ someday:d=>{const i=db.items.find(x=>x.id===d.id);if(!i)return;const o={s:i.status,d:i.date};i.prevSt=i.status;i.status='someday';i.somedayAt=Date.now();top3Sync();commit();toast('💤 A Algún día',{undo:()=>{i.status=o.s;i.date=o.d;commit()}})},
+ sdon:d=>{const i=db.items.find(x=>x.id===d.id);if(!i)return;i.status='active';if(i.type!=='Tarea'&&i.type!=='Evento')i.type='Tarea';i.date=slotDate(0,5);i.confirmedAt=i.confirmedAt||Date.now();delete i.prevSt;commit();toast('Activada para el '+ymd(i.date)+' ✓')},
+ sddrop:d=>{const i=db.items.find(x=>x.id===d.id);if(!i)return;i.status='dropped';commit();toast('Descartada',{undo:()=>{i.status='someday';commit()}})},
+ cplan:d=>{const i=db.items.find(x=>x.id===d.id);if(!i)return;
+   if(d.v==='sd'){i.prevSt=i.status;i.status='someday';i.somedayAt=Date.now()}
+   else{i.date=d.v==='hoy'?today():d.v==='man'?addDays(today(),1):slotDate(1,5);if(i.type==='Nota')i.type='Tarea';i.status='active';i.confirmedAt=Date.now()}
+   commit();toast(d.v==='sd'?'💤 A Algún día':'Planeada para el '+ymd(i.date)+' ✓');if(d.close)closeModal();else{const pb=document.getElementById('capplan');if(pb)pb.innerHTML=''}},
  oback:()=>{ui.tab=ui.oret||'hoy';paint();window.scrollTo(0,0)},
  pgo:()=>{ui.oret=ui.tab==='pasos'?ui.oret:ui.tab;ui.pskip=[];ui.tab='pasos';paint();window.scrollTo(0,0)},
  ago:()=>{if(ui.tab!=='altas')ui.oret=ui.tab;closeModal&&closeModal();ui.tab='altas';paint();window.scrollTo(0,0)},
@@ -2604,6 +2641,7 @@ const CHG={
  fdate:el=>{const i=db.items.find(x=>x.id===el.dataset.id);if(i&&el.value){i.date=el.value;fcount('moved');commit();toast('Nueva fecha: '+ymd(el.value))}},
  dtxt:el=>{db.diary=db.diary||{};const x=db.diary[today()]=db.diary[today()]||{};x[el.dataset.f]=el.value.trim();persist()},
  ciclo:el=>{setCicloToday(el.value);commit();toast('Ciclo ajustado ✓')},
+ dcap:el=>{db.settings.dayCap=Math.round(Math.max(0.5,+el.value||4)*60);commit();toast('Capacidad: '+fmtEst(dayCap())+' por día')},
  dlim:el=>{db.settings.dayLimit=Math.max(1,+el.value||5);commit();toast('Límite: '+dayLimit()+' tareas por día')},
  pr:el=>{ui.pr[el.dataset.id]=ui.pr[el.dataset.id]||{};ui.pr[el.dataset.id][el.dataset.f]=el.value;el.closest('.item').classList.add('staged')},
  hset:el=>{const k=el.dataset.f==='min'?el.dataset.id:el.dataset.id+'|'+el.dataset.dt;db.hOver[k]=db.hOver[k]||{};db.hOver[k][el.dataset.f]=el.dataset.f==='min'?(+el.value||1):el.value;commit()},
