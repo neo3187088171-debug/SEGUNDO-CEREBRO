@@ -1,291 +1,51 @@
 {
- "id": "2026-11-22-notas",
- "titulo": "Notas a tareas y proyectos (22 nov)",
- "projects": [
-  {
-   "id": "pcmvo04u1vro8si",
-   "name": "Sistema de asistencias automático",
-   "areas": [
-    "Trabajo"
-   ],
-   "dailyAction": "",
-   "dailyMin": 0
-  },
-  {
-   "id": "pcmwfdapq7jsll7",
-   "name": "Sistemas de información geográfica (mapas)",
-   "areas": [
-    "Trabajo"
-   ],
-   "dailyAction": "",
-   "dailyMin": 0
-  },
-  {
-   "id": "pcmwjlfr0tx4ttf",
-   "name": "Aplicación que genere los videos",
-   "areas": [
-    "Personal"
-   ],
-   "dailyAction": "",
-   "dailyMin": 0
-  },
-  {
-   "id": "pcmwjlocywlp9ff",
-   "name": "Aplicación para clínicas de ventas",
-   "areas": [
-    "Trabajo"
-   ],
-   "dailyAction": "",
-   "dailyMin": 0
-  },
-  {
-   "id": "pcmwjn1x782sgfy",
-   "name": "Aplicación para gamificar mi estado físico",
-   "areas": [
-    "Personal"
-   ],
-   "dailyAction": "",
-   "dailyMin": 0
-  },
-  {
-   "id": "pcmwp0r34go1zpy",
-   "name": "Aplicativo de categorización de experiencia y premios",
-   "areas": [
-    "Trabajo"
-   ],
-   "dailyAction": "",
-   "dailyMin": 0
-  }
- ],
+ "id": "2026-11-22-sin-fecha",
+ "titulo": "Tareas sin fecha (22 nov)",
  "ops": [
   {
-   "id": "mvmvfpwlj61xy",
+   "id": "mvi0eij4mtqgd",
    "if": "active",
    "set": {
-    "type": "Tarea",
-    "date": "2026-11-24",
-    "time": ""
+    "status": "done"
    }
   },
   {
-   "id": "mvp7f29kegcdc",
+   "id": "mvlbfmpk0kmb7",
    "if": "active",
    "set": {
-    "type": "Tarea",
-    "date": "2026-11-25",
-    "time": ""
+    "status": "done"
    }
   },
   {
-   "id": "mv85fuavz7j4a",
+   "id": "mvi5qrc5q1m38",
    "if": "active",
    "set": {
-    "type": "Tarea",
-    "date": "2026-11-27",
-    "time": ""
-   }
-  },
-  {
-   "id": "mvi59uico6n7b",
-   "if": "active",
-   "set": {
-    "type": "Tarea",
-    "date": "2026-12-07",
-    "time": ""
-   }
-  },
-  {
-   "id": "muysrmxybvswn",
-   "if": "active",
-   "set": {
-    "type": "Tarea",
-    "date": "2026-12-07",
-    "time": ""
-   }
-  },
-  {
-   "id": "mwjml0y6fkqir",
-   "if": "active",
-   "set": {
-    "type": "Tarea",
-    "date": "2026-12-07",
-    "time": ""
-   }
-  },
-  {
-   "id": "mvwe90pc78eei",
-   "if": "active",
-   "set": {
-    "type": "Tarea",
-    "date": "2026-12-09",
-    "time": ""
-   }
-  },
-  {
-   "id": "mwejo3hbfe3x1",
-   "if": "active",
-   "set": {
-    "type": "Tarea",
-    "date": "2026-12-09",
-    "time": ""
-   }
-  },
-  {
-   "id": "mwejp1xllmkm2",
-   "if": "active",
-   "set": {
-    "type": "Tarea",
-    "date": "2026-12-09",
-    "time": ""
-   }
-  },
-  {
-   "id": "mwf0mz3i1uxrr",
-   "if": "active",
-   "set": {
-    "type": "Tarea",
-    "date": "2026-12-09",
-    "time": ""
-   }
-  },
-  {
-   "id": "mvl6rofkuhaco",
-   "if": "active",
-   "set": {
-    "type": "Tarea",
-    "date": "2026-12-09",
-    "time": ""
-   }
-  },
-  {
-   "id": "mvl7g9t8g4orx",
-   "if": "active",
-   "set": {
-    "type": "Tarea",
     "date": "2026-12-10",
     "time": ""
    }
   },
   {
-   "id": "muyiy20h91i9w",
+   "id": "mvmjrqbcwn6bi",
    "if": "active",
    "set": {
-    "status": "dropped"
+    "date": "2026-12-11",
+    "time": ""
    }
   },
   {
-   "id": "mv6oj9ogsfs0u",
+   "id": "mvl6ua5ilc5pz",
    "if": "active",
    "set": {
-    "status": "dropped"
+    "date": "2026-12-14",
+    "time": ""
    }
   },
   {
-   "id": "mvfte5nbcgmwq",
+   "id": "mvl6sapfosc3n",
    "if": "active",
    "set": {
-    "status": "dropped"
-   }
-  },
-  {
-   "id": "mvinum0w17bq0",
-   "if": "active",
-   "set": {
-    "status": "dropped"
-   }
-  },
-  {
-   "id": "mviplgd5i84zy",
-   "if": "active",
-   "set": {
-    "status": "dropped"
-   }
-  },
-  {
-   "id": "mvjmow7j1b1bj",
-   "if": "active",
-   "set": {
-    "status": "dropped"
-   }
-  },
-  {
-   "id": "mvo6kz8qb5fcn",
-   "if": "active",
-   "set": {
-    "status": "dropped"
-   }
-  },
-  {
-   "id": "mw9aburey8guk",
-   "if": "active",
-   "set": {
-    "status": "dropped"
-   }
-  },
-  {
-   "id": "mvo04u1vro8si",
-   "if": "active",
-   "conv": "proyecto",
-   "set": {
-    "type": "Proyecto",
-    "status": "done",
-    "note": "Convertido en proyecto",
-    "project": ""
-   }
-  },
-  {
-   "id": "mwfdapq7jsll7",
-   "if": "active",
-   "conv": "proyecto",
-   "set": {
-    "type": "Proyecto",
-    "status": "done",
-    "note": "Convertido en proyecto",
-    "project": ""
-   }
-  },
-  {
-   "id": "mwjlfr0tx4ttf",
-   "if": "active",
-   "conv": "proyecto",
-   "set": {
-    "type": "Proyecto",
-    "status": "done",
-    "note": "Convertido en proyecto",
-    "project": ""
-   }
-  },
-  {
-   "id": "mwjlocywlp9ff",
-   "if": "active",
-   "conv": "proyecto",
-   "set": {
-    "type": "Proyecto",
-    "status": "done",
-    "note": "Convertido en proyecto",
-    "project": ""
-   }
-  },
-  {
-   "id": "mwjn1x782sgfy",
-   "if": "active",
-   "conv": "proyecto",
-   "set": {
-    "type": "Proyecto",
-    "status": "done",
-    "note": "Convertido en proyecto",
-    "project": ""
-   }
-  },
-  {
-   "id": "mwp0r34go1zpy",
-   "if": "active",
-   "conv": "proyecto",
-   "set": {
-    "type": "Proyecto",
-    "status": "done",
-    "note": "Convertido en proyecto",
-    "project": ""
+    "date": "2026-12-15",
+    "time": ""
    }
   }
  ]
