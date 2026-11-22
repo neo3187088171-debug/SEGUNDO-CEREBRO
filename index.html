@@ -893,6 +893,7 @@ function clearPendFor(h,undo){const p=(db.pend||{})[h.pend];if(!p)return;if(undo
 function ensureDaily(){
   const d=today();let ch=false;
   db.items.forEach(i=>{if(i.projectDaily&&i.status==='active'&&i.date<d){i.status='missed';ch=true}});
+  db.items.forEach(i=>{if(i.status==='missed'){const q=db.projects.find(x=>x.id===(i.projectDaily||i.project));if(q&&q.archived){i.status='dropped';ch=true}}});
   db.projects.filter(p=>!p.archived&&p.dailyAction).forEach(p=>{
     if(!db.items.some(i=>i.projectDaily===p.id&&i.date===d)){
       db.items.push({id:uid(),text:p.name+': '+p.dailyAction,src:'proyecto',created:Date.now(),status:'active',type:'Tarea',areas:p.areas&&p.areas.length?p.areas:['Personal'],priority:'Alta',prioManual:true,date:d,time:'',project:p.id,projectDaily:p.id,sec:0,tStart:0});ch=true}
@@ -1624,7 +1625,7 @@ function viewHoy(){
   if(agenda.length){const nm=nowMin(),past=agenda.filter(i=>toMin(i.time)<nm-30),up=agenda.filter(i=>toMin(i.time)>=nm-30);
     const body=C?(past.length?'<details class="more" data-k="agpast"'+(isOpen('agpast')?' open':'')+'><summary>⏪ '+past.length+' de horas anteriores</summary>'+past.map(i=>itemCard(i)).join('')+'</details>':'')+(up.length?more(up.map(i=>itemCard(i)),6,'agm'):'<div class="small pad">No quedan citas para más tarde.</div>'):agenda.map(i=>itemCard(i)).join('');
     h+=sec('agenda','🕒 Agenda de hoy',agenda.length,body,{open:true})}
-  if(overdue.length)h+=sec('late','⚠️ Atrasadas',overdue.length,'<button class="b3" data-act="allTomorrow">Pasar todas a mañana</button>'+more(overdue.map(i=>itemCard(i,{late:true})),4,'latem'),{open:true,cls:'bad'});
+  if(overdue.length)h+=sec('late','⚠️ Atrasadas',overdue.length,'<button class="b" data-act="vgo">Resolver una por una</button><button class="b3" data-act="allTomorrow">Pasar todas a mañana</button>'+more(overdue.map(i=>itemCard(i,{late:true})),4,'latem'),{open:true,cls:'bad'});
   if(rest.length){
     let x='<div class="chips sel scroll"><button class="fc'+(ui.area===''?' on':'')+'" data-act="area" data-v="">Todas</button>'+AREAS.map(a=>'<button class="fc'+(ui.area===a?' on':'')+'" data-act="area" data-v="'+esc(a)+'">'+esc(a)+'</button>').join('')+'</div>';
     const groups=AREAS.filter(a=>!ui.area||ui.area===a).map(a=>({a,l:rest.filter(i=>(i.areas&&i.areas.length?i.areas:['Personal'])[0]===a)})).filter(g=>g.l.length);
@@ -2281,7 +2282,26 @@ function printReport(k){
   setTimeout(()=>{try{window.print()}catch(e){}setTimeout(()=>document.body.classList.remove('printing'),800)},300);
 }
 
-const VIEWS={semana:viewSemana,progreso:viewProgress,hoy:viewHoy,habitos:viewHabitos,capturas:viewCapturas,proyectos:viewProyectos,revision:viewRevision,gym:viewGym,mas:viewMas};
+/* ---------- Atrasadas, una por una ---------- */
+function slotDate(from,span){
+  const L=dayLimit(),pool=loadPool();let best=null,bn=1e9;
+  for(let k=from;k<from+span;k++){const ds=addDays(today(),k);if(!isWD(ds))continue;
+    const n=pool.filter(i=>i.date===ds).length;if(n<L)return ds;if(n<bn){bn=n;best=ds}}
+  return best||addDays(today(),from)}
+function vencList(){const t=today(),sk=ui.vskip||[];const L=dueTasks().filter(i=>i.date<t);
+  return L.filter(i=>!sk.includes(i.id)).concat(L.filter(i=>sk.includes(i.id)))}
+function viewVencidas(){
+  const t=today(),L=vencList(),i=L[0];
+  let h='<section class="card"><div class="row between"><b>⚠️ Atrasadas</b><button class="b3" data-act="vback">← Volver a Hoy</button></div>';
+  if(!i)return h+'<div class="small pad">🎉 No tienes tareas atrasadas.</div></section>';
+  const n=daysBetween(i.date,t);
+  h+='<div class="small">Quedan <b>'+L.length+'</b>. Decide esta y pasa a la siguiente.</div></section>'
+   +'<section class="card"><div style="font-size:1.1rem;font-weight:700;line-height:1.3;margin:2px 0 6px">'+esc(i.text)+'</div>'
+   +'<div class="chips">'+itemChips(i)+'</div><div class="small">Atrasada '+n+(n===1?' día':' días')+'</div>'
+   +'<div class="grid2" style="margin-top:12px"><button class="b ok" data-act="vdone" data-id="'+i.id+'">✓ Ya la hice</button><button class="b" data-act="vweek" data-id="'+i.id+'">📅 Esta semana</button><button class="b2" data-act="vlater" data-id="'+i.id+'">🗓️ Más adelante</button><button class="b3" data-act="vdrop" data-id="'+i.id+'">🗑 Descartar</button></div>'
+   +(L.length>1?'<button class="b2" style="margin-top:8px;width:100%" data-act="vskip" data-id="'+i.id+'">Omitir por ahora</button>':'')+'</section>';
+  return h}
+const VIEWS={vencidas:viewVencidas,semana:viewSemana,progreso:viewProgress,hoy:viewHoy,habitos:viewHabitos,capturas:viewCapturas,proyectos:viewProyectos,revision:viewRevision,gym:viewGym,mas:viewMas};
 function paint(){
   const v=document.getElementById('view');if(!v)return;
   const y=window.scrollY,open=Array.from(v.querySelectorAll('details[open]:not([data-k])')).map(x=>x.querySelector('summary').textContent);
@@ -2455,6 +2475,13 @@ const ACT={
  projdaily:d=>{const el=document.getElementById('pa_'+d.id),p=db.projects.find(x=>x.id===d.id);if(p&&el.value.trim()){p.dailyAction=el.value.trim();ensureDaily();commit()}},
  askperm:async()=>{if(typeof Notification==='undefined'){toast('Este navegador no permite avisos');return}const r=await Notification.requestPermission();toast(r==='granted'?'Avisos activados ✓':'Avisos no activados');paint()},
  testnotif:()=>notify('🔔 Prueba','Si ves esto en la barra de notificaciones, los avisos funcionan.','test','./#mas'),
+ vgo:()=>{ui.vskip=[];ui.tab='vencidas';paint();window.scrollTo(0,0)},
+ vback:()=>{ui.tab='hoy';paint();window.scrollTo(0,0)},
+ vdone:d=>ACT.done(d),
+ vdrop:d=>ACT.drop(d),
+ vskip:d=>{(ui.vskip=ui.vskip||[]).push(d.id);paint();window.scrollTo(0,0)},
+ vweek:d=>{const i=db.items.find(x=>x.id===d.id);if(i){const o=i.date;i.date=slotDate(1,5);fcount('moved');commit();toast('Pasó al '+ymd(i.date)+' ✓',{undo:()=>{i.date=o;commit()}})}},
+ vlater:d=>{const i=db.items.find(x=>x.id===d.id);if(i){const o=i.date;i.date=slotDate(8,10);fcount('moved');commit();toast('Pasó al '+ymd(i.date)+' ✓',{undo:()=>{i.date=o;commit()}})}},
  pview:()=>patchView(),papply:()=>patchApply(),pundo:()=>patchUndo(),pcancel:()=>{ui.patch=null;paint()},
  share:()=>shareBackup(),download:()=>downloadBackup(),
  sysave:()=>{const u=(document.getElementById('syurl').value||'').trim(),t=(document.getElementById('sytk').value||'').trim();
