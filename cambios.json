@@ -1,0 +1,1105 @@
+{
+ "id": "2026-11-22-organizar",
+ "titulo": "Organización de bandeja y vencidas (22 nov)",
+ "ops": [
+  {
+   "id": "mur666qhpn0hr",
+   "if": "missed",
+   "set": {
+    "status": "dropped",
+    "note": "Cerrada: proyecto archivado"
+   }
+  },
+  {
+   "id": "murxca3g07dnk",
+   "if": "missed",
+   "set": {
+    "status": "dropped",
+    "note": "Cerrada: proyecto archivado"
+   }
+  },
+  {
+   "id": "mutsauv0u58rr",
+   "if": "missed",
+   "set": {
+    "status": "dropped",
+    "note": "Cerrada: proyecto archivado"
+   }
+  },
+  {
+   "id": "muusahccejysy",
+   "if": "missed",
+   "set": {
+    "status": "dropped",
+    "note": "Cerrada: proyecto archivado"
+   }
+  },
+  {
+   "id": "muwkf9sorwahn",
+   "if": "missed",
+   "set": {
+    "status": "dropped",
+    "note": "Cerrada: proyecto archivado"
+   }
+  },
+  {
+   "id": "muxncw205x219",
+   "if": "missed",
+   "set": {
+    "status": "dropped",
+    "note": "Cerrada: proyecto archivado"
+   }
+  },
+  {
+   "id": "muzfs4ucz3zyw",
+   "if": "missed",
+   "set": {
+    "status": "dropped",
+    "note": "Cerrada: proyecto archivado"
+   }
+  },
+  {
+   "id": "mv0zce2o2tt7l",
+   "if": "missed",
+   "set": {
+    "status": "dropped",
+    "note": "Cerrada: proyecto archivado"
+   }
+  },
+  {
+   "id": "mv40chsewh0st",
+   "if": "missed",
+   "set": {
+    "status": "dropped",
+    "note": "Cerrada: proyecto archivado"
+   }
+  },
+  {
+   "id": "mv536wk17zcg4",
+   "if": "missed",
+   "set": {
+    "status": "dropped",
+    "note": "Cerrada: proyecto archivado"
+   }
+  },
+  {
+   "id": "mv6mylx1luhp6",
+   "if": "missed",
+   "set": {
+    "status": "dropped",
+    "note": "Cerrada: proyecto archivado"
+   }
+  },
+  {
+   "id": "mv7zyiue28la2",
+   "if": "missed",
+   "set": {
+    "status": "dropped",
+    "note": "Cerrada: proyecto archivado"
+   }
+  },
+  {
+   "id": "mv92lezw91du4",
+   "if": "missed",
+   "set": {
+    "status": "dropped",
+    "note": "Cerrada: proyecto archivado"
+   }
+  },
+  {
+   "id": "mvaz5z91lclde",
+   "if": "missed",
+   "set": {
+    "status": "dropped",
+    "note": "Cerrada: proyecto archivado"
+   }
+  },
+  {
+   "id": "mvcc2sk4859u7",
+   "if": "missed",
+   "set": {
+    "status": "dropped",
+    "note": "Cerrada: proyecto archivado"
+   }
+  },
+  {
+   "id": "mvdu7qfp365qh",
+   "if": "missed",
+   "set": {
+    "status": "dropped",
+    "note": "Cerrada: proyecto archivado"
+   }
+  },
+  {
+   "id": "mvf45pgy11nn7",
+   "if": "missed",
+   "set": {
+    "status": "dropped",
+    "note": "Cerrada: proyecto archivado"
+   }
+  },
+  {
+   "id": "mvjfr0mi6bnvx",
+   "if": "missed",
+   "set": {
+    "status": "dropped",
+    "note": "Cerrada: proyecto archivado"
+   }
+  },
+  {
+   "id": "mvmhemx7nlvku",
+   "if": "missed",
+   "set": {
+    "status": "dropped",
+    "note": "Cerrada: proyecto archivado"
+   }
+  },
+  {
+   "id": "mvnsvl0pupsqp",
+   "if": "missed",
+   "set": {
+    "status": "dropped",
+    "note": "Cerrada: proyecto archivado"
+   }
+  },
+  {
+   "id": "mvp5ejp7iu25r",
+   "if": "missed",
+   "set": {
+    "status": "dropped",
+    "note": "Cerrada: proyecto archivado"
+   }
+  },
+  {
+   "id": "mvrn0akffqyer",
+   "if": "missed",
+   "set": {
+    "status": "dropped",
+    "note": "Cerrada: proyecto archivado"
+   }
+  },
+  {
+   "id": "mvvifi5ud71e5",
+   "if": "inbox",
+   "set": {
+    "status": "active",
+    "type": "Tarea",
+    "areas": [
+     "Personal"
+    ],
+    "project": "",
+    "date": "2026-11-23",
+    "time": "",
+    "priority": "Normal"
+   }
+  },
+  {
+   "id": "mvwe90pc78eei",
+   "if": "inbox",
+   "set": {
+    "status": "active",
+    "type": "Nota",
+    "areas": [
+     "Trabajo"
+    ],
+    "project": "mux9tugba359h",
+    "date": "",
+    "time": "",
+    "priority": "Normal"
+   }
+  },
+  {
+   "id": "mvy6e3r9v4jhq",
+   "if": "inbox",
+   "set": {
+    "status": "active",
+    "type": "Tarea",
+    "areas": [
+     "Trabajo"
+    ],
+    "project": "murjt998k6k02",
+    "date": "2026-11-26",
+    "time": "",
+    "priority": "Normal"
+   }
+  },
+  {
+   "id": "mw6us5hc7vlmg",
+   "if": "inbox",
+   "set": {
+    "status": "active",
+    "type": "Tarea",
+    "areas": [
+     "Trabajo"
+    ],
+    "project": "",
+    "date": "2026-11-23",
+    "time": "",
+    "priority": "Normal"
+   }
+  },
+  {
+   "id": "mw9aburey8guk",
+   "if": "inbox",
+   "set": {
+    "status": "active",
+    "type": "Nota",
+    "areas": [
+     "Trabajo"
+    ],
+    "project": "mvg58hpwbk96d",
+    "date": "",
+    "time": "",
+    "priority": "Normal"
+   }
+  },
+  {
+   "id": "mwc7x2yu0xqgd",
+   "if": "inbox",
+   "set": {
+    "status": "active",
+    "type": "Tarea",
+    "areas": [
+     "Trabajo"
+    ],
+    "project": "",
+    "date": "2026-11-23",
+    "time": "",
+    "priority": "Normal"
+   }
+  },
+  {
+   "id": "mwe7wziklnbm4",
+   "if": "inbox",
+   "set": {
+    "status": "active",
+    "type": "Tarea",
+    "areas": [
+     "Trabajo"
+    ],
+    "project": "",
+    "date": "2026-11-25",
+    "time": "",
+    "priority": "Alta"
+   }
+  },
+  {
+   "id": "mwecejeia4feq",
+   "if": "inbox",
+   "set": {
+    "status": "active",
+    "type": "Tarea",
+    "areas": [
+     "Trabajo"
+    ],
+    "project": "",
+    "date": "2026-11-27",
+    "time": "",
+    "priority": "Normal"
+   }
+  },
+  {
+   "id": "mwejkjw5cc1wu",
+   "if": "inbox",
+   "set": {
+    "status": "active",
+    "type": "Tarea",
+    "areas": [
+     "Trabajo"
+    ],
+    "project": "",
+    "date": "2026-12-01",
+    "time": "",
+    "priority": "Normal"
+   }
+  },
+  {
+   "id": "mwejkx7b8183r",
+   "if": "inbox",
+   "set": {
+    "status": "active",
+    "type": "Tarea",
+    "areas": [
+     "Trabajo"
+    ],
+    "project": "mux9wqyorcah6",
+    "date": "2026-11-30",
+    "time": "",
+    "priority": "Normal"
+   }
+  },
+  {
+   "id": "mwejlhm3mypms",
+   "if": "inbox",
+   "set": {
+    "status": "active",
+    "type": "Tarea",
+    "areas": [
+     "Personal"
+    ],
+    "project": "",
+    "date": "2026-12-05",
+    "time": "",
+    "priority": "Normal"
+   }
+  },
+  {
+   "id": "mwejo3hbfe3x1",
+   "if": "inbox",
+   "set": {
+    "status": "active",
+    "type": "Nota",
+    "areas": [
+     "Trabajo"
+    ],
+    "project": "mvg58hpwbk96d",
+    "date": "",
+    "time": "",
+    "priority": "Normal"
+   }
+  },
+  {
+   "id": "mwejp1xllmkm2",
+   "if": "inbox",
+   "set": {
+    "status": "active",
+    "type": "Nota",
+    "areas": [
+     "Trabajo"
+    ],
+    "project": "mvg58hpwbk96d",
+    "date": "",
+    "time": "",
+    "priority": "Normal"
+   }
+  },
+  {
+   "id": "mwf0lvyd0wqoe",
+   "if": "inbox",
+   "set": {
+    "status": "active",
+    "type": "Tarea",
+    "areas": [
+     "Trabajo"
+    ],
+    "project": "mvg58hpwbk96d",
+    "date": "2026-12-02",
+    "time": "",
+    "priority": "Normal"
+   }
+  },
+  {
+   "id": "mwf0lymw9qz1a",
+   "if": "inbox",
+   "set": {
+    "status": "dropped",
+    "type": "Tarea",
+    "areas": [
+     "Trabajo"
+    ],
+    "project": "",
+    "date": "",
+    "time": "",
+    "priority": "Normal",
+    "note": "Duplicada de otra captura"
+   }
+  },
+  {
+   "id": "mwf0mz3i1uxrr",
+   "if": "inbox",
+   "set": {
+    "status": "active",
+    "type": "Nota",
+    "areas": [
+     "Trabajo"
+    ],
+    "project": "mvg58hpwbk96d",
+    "date": "",
+    "time": "",
+    "priority": "Normal"
+   }
+  },
+  {
+   "id": "mwf80sv2r61v6",
+   "if": "inbox",
+   "set": {
+    "status": "active",
+    "type": "Tarea",
+    "areas": [
+     "Personal"
+    ],
+    "project": "mux9wqyorcah6",
+    "date": "2026-12-03",
+    "time": "",
+    "priority": "Normal"
+   }
+  },
+  {
+   "id": "mwf8dmvo0lo1s",
+   "if": "inbox",
+   "set": {
+    "status": "active",
+    "type": "Tarea",
+    "areas": [
+     "Trabajo"
+    ],
+    "project": "mux9wqyorcah6",
+    "date": "2026-12-02",
+    "time": "",
+    "priority": "Normal"
+   }
+  },
+  {
+   "id": "mwfdapq7jsll7",
+   "if": "inbox",
+   "set": {
+    "status": "active",
+    "type": "Nota",
+    "areas": [
+     "Trabajo"
+    ],
+    "project": "",
+    "date": "",
+    "time": "",
+    "priority": "Normal"
+   }
+  },
+  {
+   "id": "mwfgjg5rhizfz",
+   "if": "inbox",
+   "set": {
+    "status": "active",
+    "type": "Tarea",
+    "areas": [
+     "Trabajo"
+    ],
+    "project": "",
+    "date": "2026-12-01",
+    "time": "",
+    "priority": "Normal"
+   }
+  },
+  {
+   "id": "mwjlfr0tx4ttf",
+   "if": "inbox",
+   "set": {
+    "status": "active",
+    "type": "Nota",
+    "areas": [
+     "Personal"
+    ],
+    "project": "mux9wqyorcah6",
+    "date": "",
+    "time": "",
+    "priority": "Normal"
+   }
+  },
+  {
+   "id": "mwjlocywlp9ff",
+   "if": "inbox",
+   "set": {
+    "status": "active",
+    "type": "Nota",
+    "areas": [
+     "Trabajo"
+    ],
+    "project": "mvg58hpwbk96d",
+    "date": "",
+    "time": "",
+    "priority": "Normal"
+   }
+  },
+  {
+   "id": "mwjml0y6fkqir",
+   "if": "inbox",
+   "set": {
+    "status": "active",
+    "type": "Nota",
+    "areas": [
+     "Trabajo"
+    ],
+    "project": "",
+    "date": "",
+    "time": "",
+    "priority": "Normal"
+   }
+  },
+  {
+   "id": "mwjn1x782sgfy",
+   "if": "inbox",
+   "set": {
+    "status": "active",
+    "type": "Nota",
+    "areas": [
+     "Personal"
+    ],
+    "project": "",
+    "date": "",
+    "time": "",
+    "priority": "Normal"
+   }
+  },
+  {
+   "id": "mwp0qdorn3dyp",
+   "if": "inbox",
+   "set": {
+    "status": "active",
+    "type": "Tarea",
+    "areas": [
+     "Personal"
+    ],
+    "project": "",
+    "date": "2026-12-02",
+    "time": "",
+    "priority": "Normal"
+   }
+  },
+  {
+   "id": "mwp0qrqyie86i",
+   "if": "inbox",
+   "set": {
+    "status": "active",
+    "type": "Tarea",
+    "areas": [
+     "Trabajo"
+    ],
+    "project": "mux9tugba359h",
+    "date": "2026-11-26",
+    "time": "",
+    "priority": "Alta"
+   }
+  },
+  {
+   "id": "mwp0r34go1zpy",
+   "if": "inbox",
+   "set": {
+    "status": "active",
+    "type": "Nota",
+    "areas": [
+     "Trabajo"
+    ],
+    "project": "mux9tfw5epiy8",
+    "date": "",
+    "time": "",
+    "priority": "Normal"
+   }
+  },
+  {
+   "id": "mwp1ufi25b2ml",
+   "if": "inbox",
+   "set": {
+    "status": "active",
+    "type": "Tarea",
+    "areas": [
+     "Trabajo"
+    ],
+    "project": "murjt998k6k02",
+    "date": "2026-12-03",
+    "time": "",
+    "priority": "Normal"
+   }
+  },
+  {
+   "id": "mvsppumykbt4y",
+   "if": "active",
+   "set": {
+    "status": "done"
+   }
+  },
+  {
+   "id": "mvjprr549etuq",
+   "if": "active",
+   "set": {
+    "status": "done"
+   }
+  },
+  {
+   "id": "musjt504osqoj",
+   "if": "active",
+   "set": {
+    "status": "done"
+   }
+  },
+  {
+   "id": "muxla5aa131s6",
+   "if": "active",
+   "set": {
+    "status": "done"
+   }
+  },
+  {
+   "id": "muva8kumnd9ag",
+   "if": "active",
+   "set": {
+    "status": "done"
+   }
+  },
+  {
+   "id": "muy9aieaegmei",
+   "if": "active",
+   "set": {
+    "status": "done"
+   }
+  },
+  {
+   "id": "muxkyo772mkpe",
+   "if": "active",
+   "set": {
+    "status": "done"
+   }
+  },
+  {
+   "id": "muy9w4gcs1nkz",
+   "if": "active",
+   "set": {
+    "status": "done"
+   }
+  },
+  {
+   "id": "mv9le29ax5ssh",
+   "if": "active",
+   "set": {
+    "status": "dropped"
+   }
+  },
+  {
+   "id": "mvtfih998ji4y",
+   "if": "active",
+   "set": {
+    "status": "dropped"
+   }
+  },
+  {
+   "id": "mvsqe1j9l2v9e",
+   "if": "active",
+   "set": {
+    "status": "dropped"
+   }
+  },
+  {
+   "id": "muqwwxhxshsmg",
+   "if": "active",
+   "set": {
+    "status": "dropped"
+   }
+  },
+  {
+   "id": "mur2238wvyzzs",
+   "if": "active",
+   "set": {
+    "status": "dropped"
+   }
+  },
+  {
+   "id": "muvgrlhmeumec",
+   "if": "active",
+   "set": {
+    "status": "dropped"
+   }
+  },
+  {
+   "id": "muv61q85yaj9w",
+   "if": "active",
+   "set": {
+    "status": "dropped"
+   }
+  },
+  {
+   "id": "muyiq2x33ppxf",
+   "if": "active",
+   "set": {
+    "status": "dropped"
+   }
+  },
+  {
+   "id": "muzllk125stwi",
+   "if": "active",
+   "set": {
+    "status": "dropped"
+   }
+  },
+  {
+   "id": "muvskf93rbtuh",
+   "if": "active",
+   "set": {
+    "status": "dropped"
+   }
+  },
+  {
+   "id": "muyiia9ipdwnq",
+   "if": "active",
+   "set": {
+    "status": "dropped"
+   }
+  },
+  {
+   "id": "muzp8bdtzjy2l",
+   "if": "active",
+   "set": {
+    "status": "dropped"
+   }
+  },
+  {
+   "id": "mveh40xayibcj",
+   "if": "active",
+   "set": {
+    "date": "2026-11-30",
+    "time": "",
+    "priority": "Alta"
+   }
+  },
+  {
+   "id": "mvsprk2m1cum3",
+   "if": "active",
+   "set": {
+    "date": "2026-12-01",
+    "time": "",
+    "priority": "Alta"
+   }
+  },
+  {
+   "id": "mvjpjd0b7msyu",
+   "if": "active",
+   "set": {
+    "date": "2026-12-01",
+    "time": "",
+    "priority": "Alta"
+   }
+  },
+  {
+   "id": "mur1qb07s44u9",
+   "if": "active",
+   "set": {
+    "date": "2026-11-24",
+    "time": "",
+    "priority": "Alta"
+   }
+  },
+  {
+   "id": "muqwq913a0ke7",
+   "if": "active",
+   "set": {
+    "date": "2026-12-03",
+    "time": "",
+    "priority": "Alta"
+   }
+  },
+  {
+   "id": "musq3b6qehaup",
+   "if": "active",
+   "set": {
+    "date": "2026-12-04",
+    "time": "",
+    "priority": "Alta"
+   }
+  },
+  {
+   "id": "musnm9wc50ftk",
+   "if": "active",
+   "set": {
+    "date": "2026-11-27",
+    "time": "",
+    "priority": "Alta"
+   }
+  },
+  {
+   "id": "musnkts7j8avm",
+   "if": "active",
+   "set": {
+    "date": "2026-11-30",
+    "time": "",
+    "priority": "Alta"
+   }
+  },
+  {
+   "id": "muwqtdwyjywcb",
+   "if": "active",
+   "set": {
+    "date": "2026-12-04",
+    "time": "",
+    "priority": "Alta"
+   }
+  },
+  {
+   "id": "musnlg4fzxz4c",
+   "if": "active",
+   "set": {
+    "date": "2026-11-30",
+    "time": "",
+    "priority": "Alta"
+   }
+  },
+  {
+   "id": "mvtmvni2ej0hh",
+   "if": "active",
+   "set": {
+    "date": "2026-12-03",
+    "time": "",
+    "priority": "Alta"
+   }
+  },
+  {
+   "id": "muvk7bxu9fje7",
+   "if": "active",
+   "set": {
+    "date": "2026-12-04",
+    "time": "",
+    "priority": "Alta"
+   }
+  },
+  {
+   "id": "muqxkf59agscu",
+   "if": "active",
+   "set": {
+    "date": "2026-12-07",
+    "time": "",
+    "priority": "Alta"
+   }
+  },
+  {
+   "id": "mvtoc8jc0pw46",
+   "if": "active",
+   "set": {
+    "date": "2026-12-07",
+    "time": "",
+    "priority": "Alta"
+   }
+  },
+  {
+   "id": "mvspwmfnomnxo",
+   "if": "active",
+   "set": {
+    "date": "2026-12-04",
+    "time": "",
+    "priority": "Alta"
+   }
+  },
+  {
+   "id": "mvsqe1j9wy782",
+   "if": "active",
+   "set": {
+    "date": "2026-12-01",
+    "time": "",
+    "priority": "Alta"
+   }
+  },
+  {
+   "id": "mux9q7dtzx6rc",
+   "if": "active",
+   "set": {
+    "date": "2026-12-02",
+    "time": "",
+    "priority": "Alta"
+   }
+  },
+  {
+   "id": "muyzv22qqjsfc",
+   "if": "active",
+   "set": {
+    "date": "2026-11-30",
+    "time": "",
+    "priority": "Alta"
+   }
+  },
+  {
+   "id": "muyilcj51css2",
+   "if": "active",
+   "set": {
+    "date": "2026-12-04",
+    "time": "",
+    "priority": "Alta"
+   }
+  },
+  {
+   "id": "muyclds2g6ov9",
+   "if": "active",
+   "set": {
+    "date": "2026-12-01",
+    "time": "",
+    "priority": "Alta"
+   }
+  },
+  {
+   "id": "mv6sykwlxelpx",
+   "if": "active",
+   "set": {
+    "date": "2026-12-07",
+    "time": "",
+    "priority": "Alta"
+   }
+  },
+  {
+   "id": "mv35rlivh2oyx",
+   "if": "active",
+   "set": {
+    "date": "2026-11-30",
+    "time": "",
+    "priority": "Alta"
+   }
+  },
+  {
+   "id": "mv173f6327wmm",
+   "if": "active",
+   "set": {
+    "date": "2026-12-03",
+    "time": "",
+    "priority": "Alta"
+   }
+  },
+  {
+   "id": "muzpblgckulc8",
+   "if": "active",
+   "set": {
+    "date": "2026-12-04",
+    "time": "",
+    "priority": "Alta"
+   }
+  },
+  {
+   "id": "mvftkw59fb5ze",
+   "if": "active",
+   "set": {
+    "date": "2026-12-03",
+    "time": "",
+    "priority": "Alta"
+   }
+  },
+  {
+   "id": "mvbfmtqy1vhaq",
+   "if": "active",
+   "set": {
+    "date": "2026-12-02",
+    "time": "",
+    "priority": "Alta"
+   }
+  },
+  {
+   "id": "mvbda7e9juit0",
+   "if": "active",
+   "set": {
+    "date": "2026-12-02",
+    "time": "",
+    "priority": "Alta"
+   }
+  },
+  {
+   "id": "mvo62l4qkuj87",
+   "if": "active",
+   "set": {
+    "date": "2026-12-09",
+    "time": ""
+   }
+  },
+  {
+   "id": "muv61f0nvdkm6",
+   "if": "active",
+   "set": {
+    "date": "2026-12-10",
+    "time": ""
+   }
+  },
+  {
+   "id": "mvtods1ln4yqp",
+   "if": "active",
+   "set": {
+    "date": "2026-12-11",
+    "time": ""
+   }
+  },
+  {
+   "id": "muvgpv67oisrq",
+   "if": "active",
+   "set": {
+    "date": "2026-12-14",
+    "time": ""
+   }
+  },
+  {
+   "id": "musq2y95eno4n",
+   "if": "active",
+   "set": {
+    "date": "2026-12-15",
+    "time": ""
+   }
+  },
+  {
+   "id": "muzllbm1z4z0d",
+   "if": "active",
+   "set": {
+    "date": "2026-12-16",
+    "time": ""
+   }
+  },
+  {
+   "id": "mux7uctezekup",
+   "if": "active",
+   "set": {
+    "date": "2026-12-17",
+    "time": ""
+   }
+  },
+  {
+   "id": "mvbd15qtcafjd",
+   "if": "active",
+   "set": {
+    "date": "2026-12-18",
+    "time": ""
+   }
+  },
+  {
+   "id": "mv9jm64bn2ida",
+   "if": "active",
+   "set": {
+    "date": "2026-12-21",
+    "time": ""
+   }
+  },
+  {
+   "id": "mw00bgejvjeeg",
+   "if": "inbox",
+   "set": {
+    "status": "dropped",
+    "type": "Nota",
+    "areas": [
+     "Personal"
+    ],
+    "project": "",
+    "date": "",
+    "time": "",
+    "priority": "Normal",
+    "note": "Incompleta"
+   }
+  },
+  {
+   "id": "mw9f53zyvihsc",
+   "if": "inbox",
+   "set": {
+    "status": "dropped",
+    "type": "Nota",
+    "areas": [
+     "Trabajo"
+    ],
+    "project": "",
+    "date": "",
+    "time": "",
+    "priority": "Normal",
+    "note": "Sin detalle"
+   }
+  },
+  {
+   "id": "mwe7xf41rrmgq",
+   "if": "inbox",
+   "set": {
+    "status": "done",
+    "type": "Tarea",
+    "areas": [
+     "Trabajo"
+    ],
+    "project": "",
+    "date": "",
+    "time": "",
+    "priority": "Normal"
+   }
+  }
+ ]
+}

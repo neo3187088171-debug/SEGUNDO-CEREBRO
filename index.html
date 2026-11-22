@@ -325,6 +325,44 @@ function syncNow(show){
     .then(r=>r.json()).then(j=>{const k=syncCfg();if(j.ok){k.ok=Date.now();k.err=''}else k.err=j.error||'error';syncSave(k);if(show)toast(j.ok?'Sincronizado con Drive ✓':'⚠️ '+k.err);return !!j.ok})
     .catch(e=>{const k=syncCfg();k.err='sin conexión';syncSave(k);if(show)toast('No se pudo sincronizar. Revisa el link o la conexión.');return false})
     .finally(()=>{syncBusy=false})}
+/* ---------- Cambios de Claude ----------
+   Trae ./cambios.json, muestra una vista previa y lo fusiona por id sin pisar lo que ya cambiaste. */
+const PATCH_KEY='sc_prepatch';
+function patchPlan(p){const r={ok:0,skip:0,done:0,dropped:0,date:0,org:0};
+  (p.ops||[]).forEach(o=>{const i=db.items.find(x=>x.id===o.id);
+    if(!i||(o.if&&i.status!==o.if)){r.skip++;return}
+    r.ok++;const s=o.set||{};
+    if(s.status==='done')r.done++;else if(s.status==='dropped')r.dropped++;else if(o.if==='inbox')r.org++;else r.date++});
+  return r}
+function patchCard(){
+  const st=ui.patch;let h='<section class="card"><b>🤖 Cambios de Claude</b>';
+  if(!st)h+='<div class="small">Trae los cambios que Claude preparó y te muestra qué va a pasar antes de aplicarlos.</div><button class="b" data-act="pview">Ver cambios pendientes</button>';
+  else if(st.err)h+='<div class="small">⚠️ '+esc(st.err)+'</div><button class="b2" data-act="pview">Reintentar</button>';
+  else{const r=st.r;
+    h+='<div class="small"><b>'+esc(st.p.titulo||st.p.id)+'</b></div><div class="small">'+r.org+' capturas organizadas · '+r.done+' hechas · '+r.dropped+' descartadas · '+r.date+' reprogramadas'+(r.skip?' · '+r.skip+' omitidas (ya las cambiaste tú)':'')+'</div><button class="b" data-act="papply"'+(r.ok?'':' disabled')+'>Aplicar '+r.ok+' cambios</button><button class="b3" data-act="pcancel">Cancelar</button>'}
+  let last=null;try{last=localStorage.getItem(PATCH_KEY)}catch(e){}
+  if(last)h+='<button class="b2" data-act="pundo">↺ Deshacer los últimos cambios de Claude</button>';
+  return h+'</section>'}
+function patchView(){
+  return fetch('./cambios.json?_='+Date.now(),{cache:'no-store'}).then(r=>{if(!r.ok)throw 0;return r.json()})
+    .then(p=>{ui.patch=(db.patches||[]).includes(p.id)?{err:'Estos cambios ya se aplicaron.'}:{p:p,r:patchPlan(p)};paint()})
+    .catch(()=>{ui.patch={err:'No pude traer los cambios. Revisa la conexión.'};paint()})}
+function patchApply(){
+  const p=ui.patch&&ui.patch.p;if(!p)return;
+  try{localStorage.setItem(PATCH_KEY,JSON.stringify(db))}catch(e){toast('⚠️ No pude guardar la copia previa, no apliqué nada');return}
+  let n=0;
+  (p.ops||[]).forEach(o=>{const i=db.items.find(x=>x.id===o.id);if(!i||(o.if&&i.status!==o.if))return;
+    const s=o.set||{};Object.keys(s).forEach(k=>{i[k]=s[k]});
+    if(s.status==='done'&&!i.doneAt)i.doneAt=Date.now();
+    if(s.status==='active')i.confirmedAt=Date.now();
+    n++});
+  (db.patches=db.patches||[]).push(p.id);ui.patch=null;commit();toast(n+' cambios aplicados ✓',{ms:7000})}
+function patchUndo(){
+  let o=null;try{o=JSON.parse(localStorage.getItem(PATCH_KEY))}catch(e){}
+  if(!o||!o.items){toast('No hay nada que deshacer');return}
+  if(!confirm('Vuelve todo a como estaba antes de aplicar los cambios de Claude. Lo que hayas registrado después se pierde. ¿Seguir?'))return;
+  db=o;try{localStorage.removeItem(PATCH_KEY)}catch(e){}ui.patch=null;commit();toast('Cambios deshechos')}
+
 function syncCard(){const c=syncCfg(),on=!!(c.url&&c.token);
   return '<section class="card"><b>☁️ Sincronizar con Google Drive</b><div class="small">'+(on?'Activa · última vez: '+(c.ok?new Date(c.ok).toLocaleString('es-CO'):'aún no')+(c.err?' · ⚠️ '+esc(c.err):''):'Pega el link y la clave del buzón en Drive. Se guardan solo en este celular.')+'</div>'
    +'<input id="syurl" placeholder="Link del Apps Script (termina en /exec)" value="'+esc(c.url||'')+'"><input id="sytk" type="password" placeholder="Clave" value="'+esc(c.token||'')+'">'
@@ -1853,6 +1891,7 @@ function viewMas(){
    +'<input id="pnm" placeholder="Nombre (ej.: Mamá, Lina, mis hijos)"><input id="pac" placeholder="Qué (ej.: llamada, salida, tiempo de calidad)"><label>Cada cuántos días<input id="pev" type="number" min="1" value="7"></label><button class="b" data-act="padd">Agregar persona</button></section>';
   h+='<section class="card"><b>💾 Copia de seguridad</b><div class="small">Última copia: '+(db.lastBackup?new Date(db.lastBackup).toLocaleString('es-CO'):'nunca')+(backupDue()?' · <b>toca hacerla</b>':'')+'</div><button class="b" data-act="share">Guardar copia en Google Drive</button><button class="b2" data-act="download">Descargar archivo</button><label class="b2 fl" for="restoreInput">Restaurar copia</label></section>';
   h+=syncCard();
+  h+=patchCard();
   h+='<section class="card"><b>📦 Límite de tareas por día</b><div class="small">Sin contar tus 3 tareas principales. Si un día lo pasa, la app te ofrece repartirlas.</div><input type="number" min="1" max="30" value="'+dayLimit()+'" data-chg="dlim"></section>';
   h+='<section class="card"><b>🌱 Ciclo de actividad de crecimiento</b><div class="small">Avanza un paso por cada lunes a viernes normal (no festivos, no vacaciones, no sábados). Si se desfasó, corrígelo aquí.</div><label>'+(isWD(today())?'Hoy toca':'El próximo día hábil toca')+'<select data-chg="ciclo">'+CICLO.map((c,i)=>'<option value="'+i+'"'+(i===cicloIdx(isWD(today())?today():nextWD(today()))?' selected':'')+'>'+c+'</option>').join('')+'</select></label></section>';
   h+='<section class="card"><b>Ajustes</b><label class="sw"><input type="checkbox" data-chg="set" data-f="cont"'+(db.settings.cont?' checked':'')+'> Dictado continuo (sigue escuchando hasta que toques ■)</label><label class="sw"><input type="checkbox" data-chg="set" data-f="compact"'+(db.settings.compact!==false?' checked':'')+'> 📐 Vista compacta (menos scroll: secciones plegables y tareas en una línea)</label>'+soundHTML()+'<label class="sw"><input type="checkbox" data-chg="set" data-f="groups"'+(db.settings.groups!==false?' checked':'')+'> Agrupar pasos cortos (arreglo personal, salida, gym, alistar el día)</label><label>Tema<select data-chg="theme">'+[['auto','Automático: oscuro de 7:00 p. m. hasta que te levantas'],['light','Siempre claro'],['dark','Siempre oscuro']].map(o=>'<option value="'+o[0]+'"'+((db.settings.theme||'auto')===o[0]?' selected':'')+'>'+o[1]+'</option>').join('')+'</select></label></section>';
@@ -2414,6 +2453,7 @@ const ACT={
  projdaily:d=>{const el=document.getElementById('pa_'+d.id),p=db.projects.find(x=>x.id===d.id);if(p&&el.value.trim()){p.dailyAction=el.value.trim();ensureDaily();commit()}},
  askperm:async()=>{if(typeof Notification==='undefined'){toast('Este navegador no permite avisos');return}const r=await Notification.requestPermission();toast(r==='granted'?'Avisos activados ✓':'Avisos no activados');paint()},
  testnotif:()=>notify('🔔 Prueba','Si ves esto en la barra de notificaciones, los avisos funcionan.','test','./#mas'),
+ pview:()=>patchView(),papply:()=>patchApply(),pundo:()=>patchUndo(),pcancel:()=>{ui.patch=null;paint()},
  share:()=>shareBackup(),download:()=>downloadBackup(),
  sysave:()=>{const u=(document.getElementById('syurl').value||'').trim(),t=(document.getElementById('sytk').value||'').trim();
    if(!/^https:\/\/script\.google\.com\/.+\/exec$/.test(u)){toast('El link debe empezar por https://script.google.com/ y terminar en /exec');return}
