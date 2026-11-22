@@ -957,7 +957,7 @@ function sugHTML(light){
 const MOODS=['😞','😕','😐','🙂','😄'];
 function diaryHTML(){
   const d=today(),x=(db.diary||{})[d]||{};
-  return '<div class="diary"><div class="small"><b>Ánimo</b></div><div class="row">'+MOODS.map((m,i)=>'<button class="mood'+(x.mood===i+1?' on':'')+'" data-act="dset" data-f="mood" data-v="'+(i+1)+'">'+m+'</button>').join('')+'</div>'
+  return closePlanHTML()+'<div class="diary"><div class="small"><b>Ánimo</b></div><div class="row">'+MOODS.map((m,i)=>'<button class="mood'+(x.mood===i+1?' on':'')+'" data-act="dset" data-f="mood" data-v="'+(i+1)+'">'+m+'</button>').join('')+'</div>'
    +'<div class="small"><b>Energía</b></div><div class="row">'+[1,2,3,4,5].map(n=>'<button class="nrg'+(x.energy===n?' on':'')+'" data-act="dset" data-f="energy" data-v="'+n+'">'+n+'</button>').join('')+'</div>'
    +'<label>Una cosa que salió bien hoy <button class="b3 dmic" data-act="dictate" data-t="dgood">🎙️</button><textarea id="dgood" rows="2" data-chg="dtxt" data-f="good">'+esc(x.good||'')+'</textarea></label>'
    +'<label>Una cosa que mejoro mañana <button class="b3 dmic" data-act="dictate" data-t="dbetter">🎙️</button><textarea id="dbetter" rows="2" data-chg="dtxt" data-f="better">'+esc(x.better||'')+'</textarea></label><div id="micstat"></div>'
@@ -1064,6 +1064,8 @@ function slots(){
   if(isLastSunday(d))out.push({id:'mon10',at:'10:00',win:120,cond:()=>!((db.monthly||{})[monKey()]||{}).end,title:'🗓️ Revisión mensual',body:'Hoy es el último domingo del mes: 15 minutos para revisar '+MONTHS[fromStr(d).getMonth()]+'.',url:'./#revision'});
   delegDue().slice(0,2).forEach(i=>out.push({id:'dg'+i.id,at:'09:30',win:300,title:'👥 Seguimiento: '+i.deleg.to,body:i.text.slice(0,90),url:'./#hoy'}));
   out.push({id:'sleep45',at:'22:45',win:40,cond:()=>{const s=habitsFor(dt).find(x=>/^dormir$/i.test(x.name));return s&&!logOf(s.id)},build:()=>{const m=habitsFor(dt).filter(x=>x.block==='Noche'&&!/^dormir$/i.test(x.name)&&!isResolved(x));return {title:'😴 En 30 minutos a dormir',body:m.length?'Te faltan: '+m.map(x=>x.name).join(', '):'Ya terminaste tu noche. ¡A descansar!',url:'./#hoy'}}});
+  {const dh=habitsFor(dt).find(y=>/diary$/.test(y.id));if(dh)out.push({id:'close',at:closeAt(),win:90,cond:()=>!isResolved(dh),build:()=>{const t=(db.top3v2||[]).length;return {title:'🌙 Cierre del día',body:'Revisa lo que hiciste, mueve lo pendiente y elige tus 3 de mañana'+(t?' (ya tienes '+t+')':'')+'. 5 minutos.',url:'./#hoy'}}})}
+  if(fromStr(d).getDay()===5&&!(db.vacations||{})[addDays(d,2)])out.push({id:'wkfri',at:'17:30',win:120,title:'🗓️ El domingo toca tu revisión semanal',body:'Hoy anota todo lo que tengas en la cabeza para llegar con la bandeja lista.',url:'./#hoy'});
   out.push({id:'bk',at:'12:00',win:600,cond:backupDue,title:'💾 Copia de seguridad',body:'Han pasado 2 días. Guárdala en Google Drive con un toque.',url:'./#mas'});
   return out;
 }
@@ -1831,13 +1833,13 @@ function reportHTML(){
   return h;
 }
 /* ---------- Revisión semanal guiada ---------- */
-const WK_STEPS=['Vaciar capturas','Atrasadas','Tu semana en números','Una mejora','Plan de la semana','Proyectos'];
+const WK_STEPS=['Vaciar capturas','Atrasadas','Tu semana en números','Una mejora','Plan de la semana','Proyectos','Algún día y esperando'];
 function curImprove(){const w=db.weekly.filter(x=>x.end&&x.improve&&daysBetween(x.date,today())<=7).slice(-1)[0];return w||null}
 function weekPrios(){const w=db.weekly.filter(x=>x.end&&x.prios&&x.prios.length&&daysBetween(x.date,today())<=7).slice(-1)[0];if(!w)return [];return w.prios.map(r=>{if(r.startsWith('P:')){const p=db.projects.find(x=>x.id===r.slice(2));return p?{r,t:'📁 '+p.name,done:!!p.archived}:null}const i=db.items.find(x=>x.id===r);return i?{r,t:i.text,done:i.status==='done'}:null}).filter(Boolean)}
 function wkWizard(w){
   const st=w.step||1,t=today();
   let h='<section class="card next"><div class="row between"><b>🗓️ Revisión semanal</b><span class="tm" data-run="'+w.start+'" data-plan="3600">'+fmt((Date.now()-w.start)/1000)+'</span></div>'
-   +'<div class="wsteps">'+WK_STEPS.map((x,i)=>'<span class="'+(i+1<st?'d':i+1===st?'c':'')+'">'+(i+1)+'</span>').join('')+'</div><div class="big">Paso '+st+' de 6 · '+WK_STEPS[st-1]+'</div></section><section class="card">';
+   +'<div class="wsteps">'+WK_STEPS.map((x,i)=>'<span class="'+(i+1<st?'d':i+1===st?'c':'')+'">'+(i+1)+'</span>').join('')+'</div><div class="big">Paso '+st+' de '+WK_STEPS.length+' · '+WK_STEPS[st-1]+'</div></section><section class="card">';
   if(st===1){const ib=db.items.filter(i=>i.status==='inbox');h+='<div class="small">Deja la bandeja en 0: confirma o descarta cada captura.</div>'+(ib.length?'<div class="small"><b>Quedan '+ib.length+'</b></div>'+ib.map(i=>'<div class="item">'+editor(i)+'<div class="acts"><button class="b ok" data-act="confirm" data-id="'+i.id+'">Confirmar</button><button class="b3" data-act="drop" data-id="'+i.id+'">Descartar</button></div></div>').join(''):'<div class="small pad">🎉 Bandeja vacía.</div>')}
   if(st===2){const L=dueTasks().filter(i=>i.date<t);h+='<div class="small">Decide cada atrasada: hacerla, darle nueva fecha o descartarla.</div>'+(L.length?L.map(i=>'<div class="frow"><div>'+esc(i.text)+'<div class="chips">'+itemChips(i)+'</div></div><div class="row"><button class="b ok" data-act="done" data-id="'+i.id+'">✓</button><button class="b2" data-act="tomorrow" data-id="'+i.id+'">→ Mañana</button><input type="date" class="fdate" data-chg="fdate" data-id="'+i.id+'" value="'+esc(i.date)+'"><button class="b3" data-act="drop" data-id="'+i.id+'">Descartar</button></div></div>').join(''):'<div class="small pad">🎉 No tienes tareas atrasadas.</div>')}
   if(st===3){const ts=topStreaks(dayType());h+=reportHTML()+(ts.length?'<div class="small pad">🔥 Mejores rachas: '+ts.map(x=>esc(hName(x.h))+' '+x.n).join(' · ')+'</div>':'')}
@@ -1856,7 +1858,8 @@ function wkWizard(w){
   if(st===6){const lim=addDays(t,14),ps=db.projects.filter(p=>!p.archived).map(p=>({p,next:db.items.filter(i=>i.project===p.id&&i.status==='active'&&!i.projectDaily&&i.date&&i.date>=t&&i.date<=lim).length,tot:db.items.filter(i=>i.project===p.id&&i.status==='active').length}));
     const need=ps.filter(x=>!x.next);h+='<div class="small">Cada proyecto necesita un siguiente paso con fecha en las próximas 2 semanas.</div>'+(need.length?'<div class="small"><b>'+need.length+' proyectos sin próximo paso</b></div>'+need.map(x=>'<div class="frow"><div>📁 '+esc(x.p.name)+' <small class="small">· '+x.tot+' tareas activas</small></div><div class="row"><input id="ns_'+x.p.id+'" placeholder="Siguiente paso" style="flex:1"><input type="date" id="nd_'+x.p.id+'" class="fdate" value="'+addDays(t,1)+'"><button class="b2" data-act="wkstep" data-id="'+x.p.id+'">+</button></div></div>').join(''):'<div class="small pad">🎉 Todos tus proyectos tienen un siguiente paso.</div>')
      +'<div class="small">Si un proyecto ya no va, archívalo en la pestaña Proyectos.</div>'}
-  h+='</section><section class="card"><div class="row between">'+(st>1?'<button class="b2" data-act="wkgo" data-v="'+(st-1)+'">← Atrás</button>':'<span></span>')+(st<6?'<button class="b" data-act="wkgo" data-v="'+(st+1)+'">Siguiente →</button>':'<button class="b ok" data-act="wkend">Terminar revisión ✓</button>')+'</div><div class="small">Puedes salir cuando quieras: al volver sigues en este paso.</div></section>';
+  if(st===7)h+=wkStep7HTML();
+  h+='</section><section class="card"><div class="row between">'+(st>1?'<button class="b2" data-act="wkgo" data-v="'+(st-1)+'">← Atrás</button>':'<span></span>')+(st<WK_STEPS.length?'<button class="b" data-act="wkgo" data-v="'+(st+1)+'">Siguiente →</button>':'<button class="b ok" data-act="wkend">Terminar revisión ✓</button>')+'</div><div class="small">Puedes salir cuando quieras: al volver sigues en este paso.</div></section>';
   return h;
 }
 function viewWeekly(){
@@ -1912,6 +1915,7 @@ function viewMas(){
   h+=syncCard();
   h+=patchCard();
   h+='<section class="card"><b>📦 Límite de tareas por día</b><div class="small">Sin contar tus 3 tareas principales. Si un día lo pasa, la app te ofrece repartirlas.</div><input type="number" min="1" max="30" value="'+dayLimit()+'" data-chg="dlim"></section>';
+  h+='<section class="card"><b>🌙 Aviso del cierre del día</b><div class="small">A esta hora te recuerdo revisar el día y elegir tus 3 de mañana.</div><input type="time" value="'+closeAt()+'" data-chg="closeat"></section>';
   h+='<section class="card"><b>⏱ Horas de trabajo enfocado por día</b><div class="small">Suma del tiempo estimado de tus tareas. Si un día lo supera, te aviso. Burkeman sugiere 3–4 h de foco intenso.</div><input type="number" min="0.5" max="16" step="0.5" value="'+(dayCap()/60)+'" data-chg="dcap"></section>';
   h+='<section class="card"><b>🌱 Ciclo de actividad de crecimiento</b><div class="small">Avanza un paso por cada lunes a viernes normal (no festivos, no vacaciones, no sábados). Si se desfasó, corrígelo aquí.</div><label>'+(isWD(today())?'Hoy toca':'El próximo día hábil toca')+'<select data-chg="ciclo">'+CICLO.map((c,i)=>'<option value="'+i+'"'+(i===cicloIdx(isWD(today())?today():nextWD(today()))?' selected':'')+'>'+c+'</option>').join('')+'</select></label></section>';
   h+='<section class="card"><b>Ajustes</b><label class="sw"><input type="checkbox" data-chg="set" data-f="cont"'+(db.settings.cont?' checked':'')+'> Dictado continuo (sigue escuchando hasta que toques ■)</label><label class="sw"><input type="checkbox" data-chg="set" data-f="compact"'+(db.settings.compact!==false?' checked':'')+'> 📐 Vista compacta (menos scroll: secciones plegables y tareas en una línea)</label>'+soundHTML()+'<label class="sw"><input type="checkbox" data-chg="set" data-f="groups"'+(db.settings.groups!==false?' checked':'')+'> Agrupar pasos cortos (arreglo personal, salida, gym, alistar el día)</label><label>Tema<select data-chg="theme">'+[['auto','Automático: oscuro de 7:00 p. m. hasta que te levantas'],['light','Siempre claro'],['dark','Siempre oscuro']].map(o=>'<option value="'+o[0]+'"'+((db.settings.theme||'auto')===o[0]?' selected':'')+'>'+o[1]+'</option>').join('')+'</select></label></section>';
@@ -2392,6 +2396,30 @@ function capPlanHTML(it,full){
   return (full?'<div class="row between"><b>✓ Guardada</b><button class="b3" data-act="capClose">Después decido</button></div><div class="mini">'+esc(it.text)+'</div>':'<div class="small pad">Última: <b>'+esc(it.text.slice(0,50))+'</b></div>')
    +'<div class="small pad">¿Cuándo lo haces? Un plan concreto libera la cabeza.</div><div class="grid2">'
    +[['hoy','Hoy'],['man','Mañana'],['sem','Esta semana'],['sd','💤 Algún día']].map(x=>'<button class="b'+(x[0]==='sd'?'3':x[0]==='hoy'?'':'2')+'" data-act="cplan" data-id="'+it.id+'" data-v="'+x[0]+'"'+(full?' data-close="1"':'')+'>'+x[1]+'</button>').join('')+'</div>'}
+/* ---------- Tanda C · Cierre del día (Ivy Lee) y revisión semanal (GTD) ---------- */
+const closeAt=()=>db.settings.closeAt||'20:30';
+function closePlanHTML(){
+  const d=today(),t3=db.top3v2||[],t3s=new Set(t3.map(x=>x.ref));
+  const done=db.items.filter(i=>i.status==='done'&&i.doneAt&&dstr(new Date(i.doneAt-3*36e5))===d);
+  const pend=dueTasks().filter(i=>!t3s.has(i.id));
+  let h='<div class="diary"><div class="small"><b>1 · Lo que hiciste hoy</b></div>'
+   +(done.length?'<div class="small">✅ Completaste <b>'+done.length+'</b>: '+done.slice(0,5).map(i=>esc(i.text.replace(/\s+/g,' ').slice(0,40))).join(' · ')+(done.length>5?' …':'')+'</div>':'<div class="small">Hoy no marcaste tareas como hechas.</div>')
+   +'<div class="small pad"><b>2 · Lo que queda pendiente</b></div>';
+  h+=pend.length?pend.slice(0,6).map(i=>'<div class="frow"><div class="small">'+esc(i.text.replace(/\s+/g,' ').slice(0,80))+'</div><div class="row"><button class="b2" data-act="cmove" data-id="'+i.id+'" data-v="tm">→ Mañana</button><button class="b2" data-act="cmove" data-id="'+i.id+'" data-v="wk">Semana</button><button class="b3" data-act="cmove" data-id="'+i.id+'" data-v="sd">💤</button></div></div>').join('')+(pend.length>6?'<div class="small">y '+(pend.length-6)+' más.</div>':'')
+    :'<div class="small">✓ Nada pendiente para hoy.</div>';
+  h+='<div class="small pad"><b>3 · Tus 3 de mañana, en orden</b></div><div class="small">Empieza por la 1 y no pases a la siguiente hasta terminarla.</div>';
+  h+=t3.map((t,n)=>'<div class="frow"><div><b>'+(n+1)+'.</b> '+esc(top3Text(t).replace(/\s+/g,' ').slice(0,90))+'</div><div class="row">'+(n?'<button class="b3" data-act="cup" data-ref="'+t.ref+'" aria-label="Subir">↑</button>':'')+'<button class="b3" data-act="cout" data-ref="'+t.ref+'" aria-label="Quitar">✕</button></div></div>').join('');
+  const free=Math.max(0,3-t3.length);
+  if(free){const sg=suggestTop3([]).slice(0,free+1);
+    h+=sg.length?'<div class="small pad">Sugerencias (te faltan '+free+'):</div>'+sg.map(x=>'<div class="frow"><div class="small"><b>'+esc(x.i.text.replace(/\s+/g,' ').slice(0,80))+'</b><br>'+esc(x.why)+'</div><button class="b2" data-act="cadd" data-id="'+x.i.id+'">+ Agregar</button></div>').join(''):'<div class="small">No hay sugerencias: elige a mano en Organizar → Revisión.</div>'}
+  return h+'</div>';
+}
+function wkStep7HTML(){
+  const sd=somedayList(),dg=db.items.filter(i=>i.status==='active'&&i.deleg);
+  let h='<div class="small">GTD: revisa lo que aparcaste y lo que esperas de otros. Activa lo que llegó a su momento y borra lo que ya no te importa.</div>';
+  h+='<div class="ah">💤 Algún día <small>'+sd.length+'</small></div>'+(sd.length?sd.map(i=>'<div class="frow"><div class="small">'+esc(i.text.replace(/\s+/g,' ').slice(0,90))+'</div><div class="row"><button class="b2" data-act="sdon" data-id="'+i.id+'">▶ Activar</button><button class="b3" data-act="sddrop" data-id="'+i.id+'">🗑</button></div></div>').join(''):'<div class="small">Nada aparcado.</div>');
+  h+='<div class="ah">👥 Esperando respuesta <small>'+dg.length+'</small></div>'+(dg.length?dg.map(i=>'<div class="frow"><div class="small">'+esc(i.deleg.to)+': '+esc(i.text.replace(/\s+/g,' ').slice(0,80))+' · seguimiento '+ymd(i.deleg.follow)+'</div><div class="row"><button class="b ok" data-act="drecv" data-id="'+i.id+'">✓ Recibido</button><button class="b2" data-act="dfollow" data-id="'+i.id+'">+2 días</button></div></div>').join(''):'<div class="small">No esperas nada de nadie.</div>');
+  return h}
 const VIEWS={pasos:viewPasos,altas:viewAltas,asignar:viewAsignar,vencidas:viewVencidas,semana:viewSemana,progreso:viewProgress,hoy:viewHoy,habitos:viewHabitos,capturas:viewCapturas,proyectos:viewProyectos,revision:viewRevision,gym:viewGym,mas:viewMas};
 function paint(){
   const v=document.getElementById('view');if(!v)return;
@@ -2568,6 +2596,11 @@ const ACT={
  testnotif:()=>notify('🔔 Prueba','Si ves esto en la barra de notificaciones, los avisos funcionan.','test','./#mas'),
 
 
+ cmove:d=>{const i=db.items.find(x=>x.id===d.id);if(!i)return;const o={d:i.date,s:i.status};if(d.v==='sd'){i.prevSt=i.status;i.status='someday';i.somedayAt=Date.now()}else i.date=d.v==='tm'?addDays(today(),1):slotDate(2,5);commit();toast(d.v==='sd'?'💤 A Algún día':'Pasó al '+ymd(i.date),{undo:()=>{i.date=o.d;i.status=o.s;commit()}})},
+ cadd:d=>{db.top3v2=db.top3v2||[];if(db.top3v2.length>=3){toast('Ya tienes 3');return}if(db.top3v2.some(x=>x.ref===d.id))return;db.top3v2.push({ref:d.id,kind:'item',show:addDays(today(),1),added:today()});commit()},
+ cup:d=>{const a=db.top3v2||[],k=a.findIndex(x=>x.ref===d.ref);if(k>0){[a[k-1],a[k]]=[a[k],a[k-1]];commit()}},
+ cout:d=>{const a=db.top3v2||[],k=a.findIndex(x=>x.ref===d.ref);if(k<0)return;const x=a.splice(k,1)[0];commit();toast('Quitada de tus 3',{undo:()=>{a.splice(k,0,x);commit()}})},
+
  someday:d=>{const i=db.items.find(x=>x.id===d.id);if(!i)return;const o={s:i.status,d:i.date};i.prevSt=i.status;i.status='someday';i.somedayAt=Date.now();top3Sync();commit();toast('💤 A Algún día',{undo:()=>{i.status=o.s;i.date=o.d;commit()}})},
  sdon:d=>{const i=db.items.find(x=>x.id===d.id);if(!i)return;i.status='active';if(i.type!=='Tarea'&&i.type!=='Evento')i.type='Tarea';i.date=slotDate(0,5);i.confirmedAt=i.confirmedAt||Date.now();delete i.prevSt;commit();toast('Activada para el '+ymd(i.date)+' ✓')},
  sddrop:d=>{const i=db.items.find(x=>x.id===d.id);if(!i)return;i.status='dropped';commit();toast('Descartada',{undo:()=>{i.status='someday';commit()}})},
@@ -2641,6 +2674,7 @@ const CHG={
  fdate:el=>{const i=db.items.find(x=>x.id===el.dataset.id);if(i&&el.value){i.date=el.value;fcount('moved');commit();toast('Nueva fecha: '+ymd(el.value))}},
  dtxt:el=>{db.diary=db.diary||{};const x=db.diary[today()]=db.diary[today()]||{};x[el.dataset.f]=el.value.trim();persist()},
  ciclo:el=>{setCicloToday(el.value);commit();toast('Ciclo ajustado ✓')},
+ closeat:el=>{if(el.value){db.settings.closeAt=el.value;commit();toast('Aviso del cierre: '+fmt12(el.value))}},
  dcap:el=>{db.settings.dayCap=Math.round(Math.max(0.5,+el.value||4)*60);commit();toast('Capacidad: '+fmtEst(dayCap())+' por día')},
  dlim:el=>{db.settings.dayLimit=Math.max(1,+el.value||5);commit();toast('Límite: '+dayLimit()+' tareas por día')},
  pr:el=>{ui.pr[el.dataset.id]=ui.pr[el.dataset.id]||{};ui.pr[el.dataset.id][el.dataset.f]=el.value;el.closest('.item').classList.add('staged')},
