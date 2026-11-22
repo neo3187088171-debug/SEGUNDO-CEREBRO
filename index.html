@@ -310,7 +310,7 @@ function blank(){return {v:2,created:Date.now(),items:[],projects:[],logs:{},hOv
 function load(){try{const o=JSON.parse(localStorage.getItem(KEY));if(o&&o.items){const b=blank();Object.assign(b,o);b.settings=Object.assign(blank().settings,o.settings||{});return b}}catch(e){}return blank()}
 let db=load();
 const ui={tab:'hoy',area:'',filter:'activas',pr:{},prMode:false};
-function persist(){try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){toast('⚠️ No se pudo guardar: almacenamiento lleno o bloqueado')}syncSoon()}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){toast('⚠️ No se pudo guardar: almacenamiento lleno o bloqueado')}syncSoon();if(typeof calSoon==='function')calSoon()}
 /* ---------- Sincronización con Google Drive ----------
    El link y la clave se guardan solo en este celular (nunca en el código). */
 const SYNC_KEY='sc_sync';let syncT=0,syncFirst=0,syncBusy=false;
@@ -1035,11 +1035,11 @@ function toast(msg,opt){
   while(box.children.length>=2)box.firstChild.remove();
   box.appendChild(el);setTimeout(()=>el.remove(),opt.ms||5000);
 }
-async function notify(title,body,tag,url,actions){
+async function notify(title,body,tag,url,actions,noOS){
   if(!ui.focus){toast(title+(body?' · '+body.split('\n')[0]:''),{ms:6000});sfx(/^⏱/.test(title)?'timer':'notif')}
   try{if(navigator.vibrate)navigator.vibrate([200,100,200])}catch(e){}
   try{
-    if(typeof Notification!=='undefined'&&Notification.permission==='granted'&&navigator.serviceWorker){
+    if(!noOS&&typeof Notification!=='undefined'&&Notification.permission==='granted'&&navigator.serviceWorker){
       const reg=await navigator.serviceWorker.getRegistration();
       if(reg)await reg.showNotification(title,{body,tag:tag||undefined,icon:'icon-192.png',badge:'icon-192.png',vibrate:[200,100,200],renotify:!!tag,data:{url:url||'./'},actions:actions||[]});
     }
@@ -1076,7 +1076,7 @@ function runSchedule(){
     if(db.fired[key]||m<a||m>a+s.win)return;
     if(s.cond&&!s.cond())return;
     db.fired[key]=1;ch=true;
-    const c=s.build?s.build():s;notify(c.title,c.body,s.id,c.url,s.actions);
+    const c=s.build?s.build():s;notify(c.title,c.body,s.id,c.url,s.actions,calActive());
   });
   Object.keys(db.fired).forEach(k=>{if(k.slice(0,10)<addDays(d,-3)){delete db.fired[k];ch=true}});
   if(ch)persist();
@@ -1090,6 +1090,106 @@ function checkOvertime(){
     if(w.finStart&&!w.finEnd&&!w.finAlerted&&(Date.now()-w.finStart)/1000>=600){w.finAlerted=true;ch=true;notify('⏱️ Pasaron 10 minutos de finanzas','Puedes seguir; queda registrado.','ovfin')}}
   if(ch)persist();
 }
+
+/* ---------- 9A · Avisos reales con Google Calendar ----------
+   La app manda los avisos que vienen a tu Drive; allí se vuelven eventos con recordatorio en un
+   calendario propio. El celular los suena con la app cerrada. */
+function atTs(d,min){return fromStr(d).getTime()+min*60000}
+function calAlerts(){
+  const d=today(),now=Date.now(),out=[];
+  const add=(id,ts,t,b)=>{if(ts>now+60000)out.push({id:String(id),at:ts,t:String(t).slice(0,120),b:String(b||'').slice(0,300)})};
+  try{slots().forEach(s=>{if(db.fired[d+'|'+s.id])return;if(s.cond&&!s.cond())return;let c;try{c=s.build?s.build():s}catch(e){return}add(s.id+d,atTs(d,toMin(s.at)),c.title,c.body)})}catch(e){}
+  for(let k=1;k<=3;k++){const dd=addDays(d,k),dow=fromStr(dd).getDay();
+    try{
+      add('am8'+dd,atTs(dd,480),'🎯 Tus 3 tareas principales','Ábrelas y empieza por la primera.');
+      add('pm12'+dd,atTs(dd,720),'📊 Revisa cómo vas','Mira tu plan y lo que falta del día.');
+      add('pm4'+dd,atTs(dd,960),'⏳ Lo que falta de hoy','Revisa tus pendientes.');
+      add('close'+dd,atTs(dd,toMin(closeAt())),'🌙 Cierre del día','Revisa el día y elige tus 3 de mañana. 5 minutos.');
+      add('sl'+dd,atTs(dd,1365),'😴 En 30 minutos a dormir','Termina tu noche.');
+      if(dow===0)['10:30','14:00','17:00','21:00'].forEach(t=>add('wk'+t+dd,atTs(dd,toMin(t)),'🗓️ Revisión semanal','Hábitos, tareas, proyectos y finanzas. Máximo 1 hora.'));
+      if(dow===5)add('wkfri'+dd,atTs(dd,1050),'🗓️ El domingo toca tu revisión semanal','Anota hoy lo que tengas en la cabeza.');
+      const dtx=dtOf(dd);habitsFor(dtx,dd).forEach(h=>{const kk=KEYH.find(x=>x.rx.test(h.name));if(!kk||h.kind!=='time')return;add('key'+h.id+dd,atTs(dd,Math.max(0,toMin(hp(h,dtx).ideal)+kk.off)),kk.t,kk.b)});
+    }catch(e){}}
+  try{tasks().filter(i=>i.date&&i.time&&i.date>=d&&i.date<=addDays(d,14)).forEach(i=>{const m=toMin(i.time),tx=i.text.replace(/\s+/g,' ').slice(0,100),ic=i.type==='Evento'?'📅 ':'⏰ ';
+    if(i.date!==d)add('it'+i.id+i.date,atTs(i.date,m),ic+tx,'Programado para las '+fmt12(i.time));
+    add('ip'+i.id+i.date,atTs(i.date,m-10),'En 10 min: '+tx,'A las '+fmt12(i.time))})}catch(e){}
+  return out;
+}
+let calBusy=false,calT=0;
+function calOn(){const c=syncCfg();return !!(c.url&&c.token)&&db.settings.calAvisos!==false}
+function calActive(){const c=syncCfg();return calOn()&&!!c.calOk&&Date.now()-c.calOk<18*36e5&&!c.calErr}
+function calSoon(){if(!calOn())return;clearTimeout(calT);calT=setTimeout(()=>calSync(false),25000)}
+function calSync(show,force,extra){
+  const c=syncCfg();
+  if(!calOn()){if(show)toast('Primero configura la sincronización con Drive (Más → Sincronización).');return Promise.resolve(false)}
+  if(calBusy){return Promise.resolve(false)}
+  const list=calAlerts().concat(extra?[extra]:[]).sort((a,b)=>a.at-b.at).slice(0,400);
+  let hh=0;const str=list.map(a=>a.id+a.at+a.t+a.b).join('|');for(let i=0;i<str.length;i++)hh=(hh*31+str.charCodeAt(i))|0;hh=String(hh);
+  if(!force&&c.calHash===hh&&c.calOk&&Date.now()-c.calOk<6*36e5)return Promise.resolve(true);
+  calBusy=true;if(show)toast('Enviando avisos a Calendar…');
+  return fetch(c.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({token:c.token,avisos:list})})
+    .then(r=>r.json()).then(j=>{const k=syncCfg();
+      if(j.ok){k.calOk=Date.now();k.calErr='';k.calN=j.total;k.calHash=j.pendientes?'':hh;if(j.pendientes){clearTimeout(calT);calT=setTimeout(()=>calSync(false,true),15000)}}
+      else k.calErr=(j.error==='copia vacía'?'Falta publicar la versión nueva del script':j.error)||'error';
+      syncSave(k);if(show)toast(j.ok?'Avisos en Calendar ✓ ('+j.total+' programados)':'⚠️ '+k.calErr);return !!j.ok})
+    .catch(()=>{const k=syncCfg();k.calErr='sin conexión';syncSave(k);if(show)toast('No se pudo enviar a Calendar. Revisa la conexión.');return false})
+    .finally(()=>{calBusy=false;if(ui.tab==='mas')paint()})}
+function calCard(){const c=syncCfg(),on=calOn();
+  let st;if(!(c.url&&c.token))st='<div class="note">Primero configura la sincronización con Drive (más abajo).</div>';
+  else if(!on)st='<div class="small">Apagado.</div>';
+  else if(c.calErr)st='<div class="badge bad">⚠️ '+esc(c.calErr)+'</div>';
+  else if(c.calOk)st='<div class="badge ok">✓ '+(c.calN||0)+' avisos programados · última vez '+new Date(c.calOk).toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'})+'</div>';
+  else st='<div class="small">Aún no se ha enviado nada.</div>';
+  return '<section class="card"><b>📅 Avisos con la app cerrada (Google Calendar)</b><div class="small">La app crea tus avisos en un calendario propio de tu Google. El celular los suena con su sonido aunque la app esté cerrada. Se actualizan cada vez que abres la app.</div>'+st
+   +'<div class="row"><button class="b2" data-act="calsync">Enviar ahora</button><button class="b" data-act="caltest">Probar en 2 min</button><button class="b3" data-act="calon">'+(on?'Apagar':'Encender')+'</button></div>'
+   +'<div class="note">Para que suenen: en el celular abre Google Calendar → Ajustes → «Segundo cerebro (avisos)» → activa notificaciones, y deja el calendario visible.</div></section>'}
+/* ---------- 9B · Lo que haces ahora, a la vista (ventana flotante + notificación fija) ---------- */
+const FL={on:false,v:null,c:null,iv:0,key:''};
+function nowCard(){
+  const dt=dayType();
+  try{
+    for(const h of allHabits()){const l=logOf(h.id);if(l&&l.start&&!l.end){const p=hp(h,dt),s=(Date.now()-l.start)/1000;return {ic:'▶',lab:'HACIENDO AHORA',t:hName(h),s:fmt(s)+(p&&p.min?' de '+p.min+' min':''),over:!!(p&&p.min&&s>p.min*60)}}}
+    const run=db.items.find(i=>i.tStart);if(run)return {ic:'▶',lab:'TAREA EN CURSO',t:run.text.replace(/\s+/g,' ').slice(0,90),s:fmt((Date.now()-run.tStart)/1000+(run.sec||0))};
+    const U=unitsFor(dt),i=U.findIndex(u=>!uRes(u));
+    if(i>=0){const u=U[i],nx=U[i+1];return {ic:'⏭',lab:'SIGUE EN TU RUTINA',t:u.g?u.g.name:hName(u.h),s:nx?'Luego: '+(nx.g?nx.g.name:hName(nx.h)):u.block}}
+    const t3=top3Active()[0];if(t3)return {ic:'🎯',lab:'TAREA PRINCIPAL',t:String(t3.text).replace(/\s+/g,' ').slice(0,90),s:'Rutina de hoy completa'};
+  }catch(e){}
+  return {ic:'🎉',lab:'TODO AL DÍA',t:'Sin pendientes en tu rutina',s:''};
+}
+function wrapTxt(x,txt,maxW,maxL){const w=String(txt).split(' '),L=[];let cur='';w.forEach(a=>{const t=cur?cur+' '+a:a;if(x.measureText(t).width>maxW&&cur){L.push(cur);cur=a}else cur=t});if(cur)L.push(cur);if(L.length>maxL){L.length=maxL;L[maxL-1]=L[maxL-1].replace(/.{0,2}$/,'…')}return L}
+function flDraw(){
+  const c=FL.c;if(!c)return;const x=c.getContext('2d'),W=c.width,H=c.height,n=nowCard();
+  const g=x.createLinearGradient(0,0,W,H);g.addColorStop(0,'#14302A');g.addColorStop(1,'#1F4D40');x.fillStyle=g;x.fillRect(0,0,W,H);
+  x.fillStyle=n.over?'#E5484D':'#FFC400';x.fillRect(0,0,14,H);
+  x.font='64px sans-serif';x.textBaseline='middle';x.fillStyle='#fff';x.fillText(n.ic,34,66);
+  x.font='700 24px sans-serif';x.fillStyle=n.over?'#FF9B9B':'#FFD84D';x.fillText(n.lab,120,36);
+  x.font='700 36px sans-serif';x.fillStyle='#fff';wrapTxt(x,n.t,W-150,2).forEach((l,k)=>x.fillText(l,120,82+k*44));
+  x.font='600 30px sans-serif';x.fillStyle=n.over?'#FF9B9B':'#BFE8D8';x.fillText(n.s,120,H-30);
+  const key=n.lab+'|'+n.t;if(key!==FL.key){FL.key=key;if(db.settings.pinNote)flPinUpdate(true)}
+}
+async function flToggle(){
+  if(FL.on){flClose();toast('Ventana flotante cerrada');paint();return}
+  try{
+    if(!document.pictureInPictureEnabled){toast('Este navegador no permite la ventana flotante. Usa «Notificación fija» abajo en Más.');return}
+    FL.c=document.createElement('canvas');FL.c.width=640;FL.c.height=260;
+    FL.v=document.createElement('video');FL.v.muted=true;FL.v.playsInline=true;FL.v.setAttribute('playsinline','');FL.v.style.cssText='position:fixed;left:-9999px;top:0;width:2px;height:2px;opacity:0';
+    document.body.appendChild(FL.v);flDraw();FL.v.srcObject=FL.c.captureStream(4);
+    await FL.v.play();await FL.v.requestPictureInPicture();
+    FL.on=true;clearInterval(FL.iv);FL.iv=setInterval(flDraw,1000);
+    FL.v.addEventListener('leavepictureinpicture',()=>{flClose();paint()},{once:true});
+    toast('🪟 Flotante activa. Sal de la app y la verás encima de las demás.',{ms:6000});paint()
+  }catch(e){flClose();toast('No se pudo abrir la ventana flotante: '+((e&&e.name)||'error'))}
+}
+function flClose(){FL.on=false;clearInterval(FL.iv);try{if(document.pictureInPictureElement)document.exitPictureInPicture()}catch(e){}try{if(FL.v){FL.v.pause();FL.v.srcObject=null;FL.v.remove()}}catch(e){}FL.v=null;FL.c=null}
+async function flPinUpdate(force){
+  try{if(typeof Notification==='undefined'||Notification.permission!=='granted'||!navigator.serviceWorker)return;
+    const reg=await navigator.serviceWorker.getRegistration();if(!reg)return;const n=nowCard();
+    await reg.showNotification(n.ic+' '+n.t,{body:n.lab.toLowerCase().replace(/^./,m=>m.toUpperCase())+(n.s?' · '+n.s:''),tag:'ahora',renotify:false,silent:true,requireInteraction:true,icon:'icon-192.png',badge:'icon-192.png',data:{url:'./#hoy'}})}catch(e){}
+}
+async function flPinClose(){try{const reg=await navigator.serviceWorker.getRegistration();if(!reg)return;(await reg.getNotifications({tag:'ahora'})).forEach(n=>n.close())}catch(e){}}
+function floatCard(){return '<section class="card"><b>🪟 Siempre a la vista</b><div class="small">Muestra lo que estás haciendo y lo que sigue mientras usas otras apps.</div>'
+  +'<div class="row"><button class="b" data-act="float">'+(FL.on?'Quitar ventana flotante':'Ventana flotante')+'</button><button class="b2" data-act="pinnote">'+(db.settings.pinNote?'Quitar notificación fija':'Notificación fija')+'</button></div>'
+  +'<div class="note">La ventana flotante se abre sobre otras apps mientras la app siga en memoria; puedes moverla y achicarla. Android no deja que una página elija su transparencia. La notificación fija se actualiza cuando abres la app.</div></section>'}
 
 /* ---------- Voz y captura ---------- */
 let rec=null,listening=false,micReady=false;
@@ -1531,7 +1631,7 @@ function timelineHTML(dt){
   const short=m=>{m=((Math.round(m)%1440)+1440)%1440;return (Math.floor(m/60)%12||12)+':'+pad(m%60)};
   const tsMin=ms=>{const d=new Date(ms);return d.getHours()*60+d.getMinutes()};
   const inB=U.filter(u=>u.block===cu.block);
-  let h='<section class="card tl"><div class="small tlh">Siguiente en tu rutina · <b>'+esc(cu.block)+'</b> · paso '+(inB.indexOf(cu)+1)+' de '+inB.length+'</div>';
+  let h='<section class="card tl"><div class="small tlh">Siguiente en tu rutina · <b>'+esc(cu.block)+'</b> · paso '+(inB.indexOf(cu)+1)+' de '+inB.length+' <button class="b3 mini" data-act="float">'+(FL.on?'🪟 Quitar flotante':'🪟 Flotar')+'</button></div>';
   U.slice(Math.max(0,i-2),i).forEach(u=>{const st=uState(u);let m;if(u.g){const G=((db.grpLog||{})[today()]||{})[u.g.id]||{},le=u.members.map(x=>logOf(x.id)||{});m=tsMin(G.end||Math.max(...le.map(l=>l.end||l.at||0))||Date.now())}else{const l=logOf(u.h.id)||{};m=l.t?toMin(l.t):tsMin(l.end||l.at||Date.now())}
     const nm=u.g?u.g.name:hName(u.h),wy=!u.g&&logOf(u.h.id)&&logOf(u.h.id).why?' · '+esc(logOf(u.h.id).why):'';
     h+='<div class="it done '+st+'"><div class="t">'+short(m)+'</div><div class="dot"></div><div><div class="nm">'+esc(nm)+'</div><div class="sm">'+({ok:'✓ cumplido',late:'⏱ fuera de tiempo',skip:'✗ no lo hice',miss:'✗ muy tarde',na:'– no aplica'}[st]||'')+wy+'</div></div></div>'});
@@ -1912,6 +2012,7 @@ function viewMas(){
   let h='<section class="card"><b>📲 Aplicación</b>'+(isStandalone()?'<div class="badge ok">✓ Estás usando la app instalada</div>':installEvt?'<div class="small">Chrome permite instalarla en tu celular.</div><button class="b" data-act="install">Instalar aplicación</button>':'<div class="small">Para instalarla: menú ⋮ de Chrome → «Instalar aplicación» o «Añadir a pantalla de inicio». Debe estar abierta desde su dirección https://.</div>')+'</section>';
   h+='<section class="card"><b>🔔 Avisos</b><div class="small">Estado: '+perm+'</div><button class="b" data-act="askperm">Activar avisos</button> <button class="b2" data-act="testnotif">Probar aviso</button>'
    +'<div class="note">Android puede dormir la app cuando está cerrada y los avisos programados pueden llegar tarde. En Ajustes de Android pon Chrome y la app con batería «Sin restricciones».</div></section>';
+  h+=calCard()+floatCard();
   h+='<section class="card"><b>👁 Hábitos ocultos</b>'+((db.hidden||[]).length?(db.hidden.map(n=>'<div class="rr"><span>'+esc(n)+'</span><button class="b3 mini" data-act="hshow" data-n="'+esc(n)+'">Mostrar</button></div>').join('')):'<div class="small">No tienes hábitos ocultos.</div>')+'<label>Ocultar un hábito<select id="hidesel"><option value="">Elige…</option>'+[...new Set(H.filter(x=>!x.pend).map(x=>x.name))].filter(n=>!(db.hidden||[]).includes(n)).map(n=>'<option>'+esc(n)+'</option>').join('')+'</select></label><button class="b2" data-act="hhidesel">Ocultar</button></section>';
   h+='<section class="card"><b>💛 Personas importantes</b><div class="small">A quién quieres cuidar y cada cuánto. Te aviso en Hoy si se te pasa.</div>'
    +((db.people||[]).map(p=>'<div class="rr"><span><b>'+esc(p.name)+'</b> · '+esc(p.action||'tiempo juntos')+' cada '+p.every+' días<br><small>'+(personLast(p)?'Última vez: '+ymd(personLast(p)):'Sin registros aún')+'</small></span><button class="b3" data-act="pdel" data-id="'+p.id+'">🗑</button></div>').join('')||'')
@@ -2616,6 +2717,7 @@ const ACT={
  archproj:d=>{const p=db.projects.find(x=>x.id===d.id);if(p)archiveProject(p)},
  projtask:d=>{const el=document.getElementById('pt_'+d.id),t=el.value.trim(),p=db.projects.find(x=>x.id===d.id);if(!t||!p)return;db.items.unshift({id:uid(),text:t,src:'proyecto',created:Date.now(),status:'active',type:'Tarea',areas:p.areas||['Personal'],priority:'Normal',prioManual:false,date:'',time:'',project:p.id,sec:0,tStart:0});commit()},
  projdaily:d=>{const el=document.getElementById('pa_'+d.id),p=db.projects.find(x=>x.id===d.id);if(p&&el.value.trim()){p.dailyAction=el.value.trim();ensureDaily();commit()}},
+ float:()=>{flToggle()},pinnote:()=>{db.settings.pinNote=!db.settings.pinNote;persist();if(db.settings.pinNote)flPinUpdate(true);else flPinClose();paint()},calsync:()=>{calSync(true,true)},caltest:()=>{calSync(true,true,{id:'test'+Date.now(),at:Date.now()+120000,t:'🔔 Prueba de aviso',b:'Si ves esto, Calendar te avisa con la app cerrada.'})},calon:()=>{db.settings.calAvisos=db.settings.calAvisos===false;persist();if(db.settings.calAvisos!==false)calSync(true,true);paint()},
  askperm:async()=>{if(typeof Notification==='undefined'){toast('Este navegador no permite avisos');return}const r=await Notification.requestPermission();toast(r==='granted'?'Avisos activados ✓':'Avisos no activados');paint()},
  testnotif:()=>notify('🔔 Prueba','Si ves esto en la barra de notificaciones, los avisos funcionan.','test','./#mas'),
 
@@ -2731,7 +2833,7 @@ function tick(){
   if(tk%10===0){
     if(lastDay!==today()){lastDay=today();CYC={};ensureDaily();paint()}
     const m=nowMin();if(ui.tab==='hoy'&&m!==lastMin&&!document.querySelector('#view input:focus,#view textarea:focus,#view select:focus')){const gate=['09:00','11:45','17:00'].some(x=>toMin(x)===m);if(gate)paint()}lastMin=m;
-    checkOvertime();runSchedule();
+    checkOvertime();runSchedule();if(tk%300===0)calSync(false);
   }
 }
 function migrate(){
@@ -2742,7 +2844,7 @@ function migrate(){
   AH=null;CYC={};ensureCicloAnchor();top3Migrate();gymInit();
 }
 function init(){
-  migrate();lastDay=today();ensureDaily();persist();setTimeout(checkAch,1500);
+  migrate();lastDay=today();ensureDaily();persist();setTimeout(checkAch,1500);setTimeout(()=>calSync(false),4000);
   document.addEventListener('click',e=>{
     if(e.target.closest('#fx')){const wb=e.target.closest('[data-why]');if(wb){setWhy(wb.dataset.why);return}closeFx();return}
     const m=document.getElementById('modal');if(e.target===m){closeModal();return}
@@ -2774,7 +2876,7 @@ function init(){
     navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.type==='go'){const h=(e.data.url||'').split('#')[1];if(VIEWS[h]){ui.tab=h;paint()}}});
   }
   try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
-  document.addEventListener('visibilitychange',()=>{if(document.hidden&&syncT)syncNow(false);syncWake();if(!document.hidden){if(lastDay!==today()){lastDay=today();CYC={}}ensureDaily();runSchedule();paint()}});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden&&syncT)syncNow(false);syncWake();if(!document.hidden){if(lastDay!==today()){lastDay=today();CYC={}}ensureDaily();runSchedule();calSync(false);paint()}});
   setInterval(tick,1000);setTimeout(runSchedule,1500);
 }
 if(typeof document!=='undefined'&&document.getElementById&&document.getElementById('view')&&!globalThis.__TEST__)init();
